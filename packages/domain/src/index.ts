@@ -7,4 +7,10 @@
 
 export type { UserId, WordId, WordStatus, SrsDifficulty } from './types.js';
 export type { Word, Pronunciation } from './word.js';
+export {
+  scheduleNextReview,
+  createInitialSrsItem,
+  type ScheduleNextReviewParams,
+  type ScheduleNextReviewResult,
+} from './srs.js';
 

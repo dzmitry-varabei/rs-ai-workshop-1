@@ -299,6 +299,31 @@
                         <strong>😄 Мысль:</strong> "Маленькие PR — это как маленькие порции еды. Легче переварить и понять, что внутри!" 🍽️
                     </div>
                 </section>
+
+                <section>
+                    <h3>🗄️ Второй маленький PR: База данных</h3>
+                    
+                    <div class="decision">
+                        <strong>✅ Создана:</strong> Первая миграция Supabase с базовыми таблицами
+                    </div>
+
+                    <ul style="font-size: 0.9em; margin-top: 1em;">
+                        <li>✅ Enum типы (word_status, srs_difficulty)</li>
+                        <li>✅ Таблица profiles (связь с Supabase Auth)</li>
+                        <li>✅ Таблица words (словарь 3000 слов)</li>
+                        <li>✅ Таблица word_pronunciations (произношения)</li>
+                        <li>✅ Индексы для производительности</li>
+                        <li>✅ Инструкции по настройке Supabase.com</li>
+                    </ul>
+
+                    <div class="thought" style="margin-top: 1em; font-size: 0.8em;">
+                        <strong>📏 Размер PR:</strong> 121 строка — снова маленький и сфокусированный! Решили использовать облачный Supabase (supabase.com) вместо локального.
+                    </div>
+
+                    <div class="insight" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); margin-top: 1em; font-size: 0.8em;">
+                        <strong>💡 Решение:</strong> Используем облачный Supabase для простоты. Бесплатный tier достаточно для разработки. Миграции можно применить через SQL Editor или CLI.
+                    </div>
+                </section>
             </section>
 
             <!-- Template for future days -->
@@ -589,12 +614,12 @@
 
         // Метрики (можно обновлять вручную)
         const metrics = {
-            prCount: 1,
-            linesCount: 1109,
-            timeSpent: 3,
-            filesCount: 21,
+            prCount: 2,
+            linesCount: 1230,
+            timeSpent: 4,
+            filesCount: 23,
             testsCount: 0,
-            commitsCount: 3,
+            commitsCount: 4,
             daysCount: 1
         };
 

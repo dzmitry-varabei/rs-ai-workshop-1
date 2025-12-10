@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дневник разработки: English Learning System</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/theme/white.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        .reveal {
+            font-size: 32px;
+        }
+        .reveal .slides section {
+            text-align: left;
+            padding: 20px 60px;
+        }
+        .reveal h1 {
+            font-size: 2.2em;
+            text-align: center;
+        }
+        .reveal h2 {
+            font-size: 1.6em;
+            text-align: center;
+        }
+        .reveal h3 {
+            font-size: 1.2em;
+            text-align: center;
+        }
+        .reveal p, .reveal li {
+            font-size: 0.9em;
+            line-height: 1.3;
+        }
+        .reveal ul, .reveal ol {
+            margin: 0.5em 0;
+        }
+        .date {
+            color: #666;
+            font-size: 0.7em;
+            font-style: italic;
+        }
+        .thought {
+            background: #f0f0f0;
+            padding: 0.6em 0.8em;
+            border-left: 4px solid #42a5f5;
+            margin: 0.5em 0;
+            font-size: 0.85em;
+        }
+        .joke {
+            background: #fff9c4;
+            padding: 0.6em 0.8em;
+            border-left: 4px solid #fbc02d;
+            margin: 0.5em 0;
+            font-style: italic;
+            font-size: 0.85em;
+        }
+        .decision {
+            background: #e8f5e9;
+            padding: 0.6em 0.8em;
+            border-left: 4px solid #4caf50;
+            margin: 0.5em 0;
+            font-size: 0.85em;
+        }
+        .problem {
+            background: #ffebee;
+            padding: 0.6em 0.8em;
+            border-left: 4px solid #f44336;
+            margin: 0.5em 0;
+            font-size: 0.85em;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8em;
+            margin: 1em 0;
+        }
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.8em;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .metric-card h3 {
+            margin: 0 0 0.3em 0;
+            font-size: 0.75em;
+            opacity: 0.9;
+        }
+        .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin: 0;
+        }
+        .metric-label {
+            font-size: 0.7em;
+            opacity: 0.8;
+            margin-top: 0.3em;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1em 0;
+        }
+        .lesson {
+            background: #e3f2fd;
+            padding: 0.6em 0.8em;
+            border-left: 4px solid #2196f3;
+            margin: 0.5em 0;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+        .lesson h4 {
+            margin-top: 0;
+            margin-bottom: 0.3em;
+            color: #1976d2;
+            font-size: 1em;
+        }
+        .insight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.8em;
+            border-left: 4px solid #9c27b0;
+            margin: 0.5em 0;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+        .insight h4 {
+            margin-top: 0;
+            margin-bottom: 0.3em;
+            color: white;
+            font-size: 1em;
+        }
+        .bug {
+            background: #ffebee;
+            padding: 0.8em;
+            border-left: 4px solid #f44336;
+            margin: 0.5em 0;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+        .bug h4 {
+            margin-top: 0;
+            margin-bottom: 0.3em;
+            color: #c62828;
+            font-size: 1em;
+        }
+        .question {
+            background: #fff3e0;
+            padding: 0.8em;
+            border-left: 4px solid #ff9800;
+            margin: 0.5em 0;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+        .question h4 {
+            margin-top: 0;
+            margin-bottom: 0.3em;
+            color: #e65100;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- Title slide -->
+            <section>
+                <h1>📔 Дневник разработки</h1>
+                <h2>English Learning System</h2>
+                <p style="text-align: center; margin-top: 1.5em;">
+                    <strong>Автор:</strong> Alex (AI Developer)<br>
+                    <span class="date">Начало проекта: 2025</span>
+                </p>
+                <p style="text-align: center; margin-top: 1.5em; font-size: 0.7em; color: #666;">
+                    Гранулярная разработка с помощью AI агентов
+                </p>
+            </section>
+
+            <!-- About me -->
+            <section>
+                <h2>👋 О себе</h2>
+                <p style="margin-bottom: 0.8em;">Привет! Я <strong>Alex</strong> — AI разработчик, работающий над системой изучения английского языка.</p>
+                
+                <div class="thought">
+                    <strong>Моя задача:</strong> Создать экосистему из веб-викторины и Telegram-бота с интервальным повторением, используя подход гранулярной разработки — маленькие PR, четкие планы, понятная архитектура.
+                </div>
+
+                <div class="joke">
+                    <strong>💡 Первая мысль:</strong> "3000 слов Oxford Dictionary... это примерно как прочитать 'Войну и мир', но вместо романа — словарь. Надеюсь, пользователи оценят!" 😄
+                </div>
+            </section>
+
+            <!-- Day 1: Project Setup -->
+            <section>
+                <section>
+                    <h2>📅 День 1: Начало проекта</h2>
+                    <p class="date">Дата: 2025-01-XX</p>
+                    
+                    <h3>Что сделал:</h3>
+                    <ul>
+                        <li>✅ Изучил задание в <code>task.md</code></li>
+                        <li>✅ Прочитал и проанализировал план в <code>plan-draft.md</code></li>
+                        <li>✅ Обсудил архитектуру и выявил потенциальные проблемы</li>
+                        <li>✅ Создал интерактивный дневник разработки (Reveal.js)</li>
+                        <li>✅ Создал структуру monorepo (pnpm workspace)</li>
+                        <li>✅ Написал всю документацию (AGENTS.md, CONTRIBUTING.md, docs/*)</li>
+                        <li>✅ Настроил PR темплейт и базовые файлы проекта</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3>🤔 Первые размышления</h3>
+                    
+                    <div class="thought">
+                        <strong>О плане:</strong> План выглядит солидно — слоистая архитектура, Supabase вместо localStorage, расширяемая модель данных. Но для учебного проекта это может быть over-engineering...
+                    </div>
+
+                    <div class="decision">
+                        <strong>✅ Решение:</strong> Но раз цель — обкатать гранулярную разработку с AI агентами, то правильная архитектура важнее простоты. Идем по плану!
+                    </div>
+
+                    <div class="joke">
+                        <strong>😄 Шутка дня:</strong> "Почему программисты не любят природу? Там слишком много багов... но мы их исправим! 🐛→✅"
+                    </div>
+                </section>
+
+                <section>
+                    <h3>📊 Статистика дня</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6em; margin: 1em 0;">
+                        <div style="background: #e8f5e9; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
+                            <strong>Файлов создано:</strong> ~15
+                        </div>
+                        <div style="background: #e8f5e9; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
+                            <strong>Строк документации:</strong> ~1000+
+                        </div>
+                        <div style="background: #e8f5e9; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
+                            <strong>Папок создано:</strong> 10+
+                        </div>
+                        <div style="background: #e8f5e9; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
+                            <strong>Время работы:</strong> ~2 часа
+                        </div>
+                    </div>
+
+                    <div class="decision" style="margin-top: 1.5em;">
+                        <strong>✅ Достижения:</strong> Проект полностью готов к началу разработки! Вся инфраструктура, документация и инструменты на месте.
+                    </div>
+                </section>
+
+                <section>
+                    <h3>🎉 Первый коммит</h3>
+                    
+                    <div class="thought" style="background: #e8f5e9; font-size: 0.85em;">
+                        <strong>Коммит:</strong> <code style="font-size: 0.9em;">feat: initial project setup</code><br>
+                        <strong>Ветка:</strong> <code style="font-size: 0.9em;">feature/initial-project-setup</code><br>
+                        <strong>Файлов изменено:</strong> 18 файлов<br>
+                        <strong>Строк добавлено:</strong> 2981+<br>
+                        <strong>PR:</strong> Готов к созданию на GitHub
+                    </div>
+
+                    <div class="thought" style="margin-top: 1.5em;">
+                        <strong>📋 Следующие шаги:</strong> 
+                        <ol style="margin-top: 0.5em; font-size: 0.9em;">
+                            <li>Настроить базовые пакеты (domain, infra-supabase)</li>
+                            <li>Создать миграции Supabase</li>
+                            <li>Начать разработку веб-приложения</li>
+                        </ol>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Template for future days -->
+            <section>
+                <section>
+                    <h2>📅 День X: [Название дня]</h2>
+                    <p class="date">Дата: [дата]</p>
+                    
+                    <h3>Что сделал:</h3>
+                    <ul>
+                        <li>[Действие 1]</li>
+                        <li>[Действие 2]</li>
+                        <li>[Действие 3]</li>
+                    </ul>
+
+                    <div class="problem">
+                        <strong>⚠️ Проблема:</strong> [Описание проблемы, если была]
+                    </div>
+
+                    <div class="decision">
+                        <strong>✅ Решение:</strong> [Как решил]
+                    </div>
+
+                    <div class="joke">
+                        <strong>😄 Шутка дня:</strong> [Шутка или забавная мысль]
+                    </div>
+                </section>
+            </section>
+
+            <!-- Metrics section -->
+            <section>
+                <section>
+                    <h2>📊 Метрики проекта</h2>
+                    <p class="date">Обновляется по мере разработки</p>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h3>Pull Requests</h3>
+                            <p class="metric-value" id="pr-count">0</p>
+                            <p class="metric-label">Создано PR</p>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <h3>Строки кода</h3>
+                            <p class="metric-value" id="lines-count">0</p>
+                            <p class="metric-label">Написано строк</p>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <h3>Время работы</h3>
+                            <p class="metric-value" id="time-spent">0ч</p>
+                            <p class="metric-label">Часов потрачено</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1em; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6em;">
+                        <div style="background: #f5f5f5; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
+                            <strong>Файлов создано:</strong> <span id="files-count">0</span>
+                        </div>
+                        <div style="background: #f5f5f5; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
+                            <strong>Тестов написано:</strong> <span id="tests-count">0</span>
+                        </div>
+                        <div style="background: #f5f5f5; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
+                            <strong>Коммитов:</strong> <span id="commits-count">0</span>
+                        </div>
+                        <div style="background: #f5f5f5; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
+                            <strong>Дней работы:</strong> <span id="days-count">1</span>
+                        </div>
+                    </div>
+
+                    <div class="thought" style="margin-top: 1em; font-size: 0.8em;">
+                        <strong>💡 Примечание:</strong> Метрики обновляются вручную по мере работы. Это помогает отслеживать прогресс и видеть, сколько работы уже проделано!
+                    </div>
+                </section>
+
+                <section>
+                    <h2>📈 График прогресса</h2>
+                    <p class="date">Развитие проекта по времени</p>
+                    
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+
+                    <div class="joke" style="margin-top: 0.8em; font-size: 0.8em;">
+                        <strong>😄 Мысль:</strong> "График растет медленно, но верно. Как изучение английского — главное регулярность!" 📚
+                    </div>
+                </section>
+
+                <section>
+                    <h2>📈 Детальная статистика</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2em;">
+                        <div>
+                            <h3>PR по типам</h3>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="prTypeChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h3>Активность по дням</h3>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="activityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Lessons Learned section -->
+            <section>
+                <section>
+                    <h2>🎓 Уроки, которые я выучил</h2>
+                    <p class="date">Накапливается по мере работы</p>
+                    
+                    <div class="lesson">
+                        <h4>📅 День 1: О важности планирования</h4>
+                        <p><strong>Что узнал:</strong> Обсуждение плана перед началом работы помогло выявить потенциальные проблемы (over-engineering, отсутствие RLS, простой SRS алгоритм). Также понял, что для учебного проекта с целью обкатки гранулярной разработки правильная архитектура важнее простоты.</p>
+                        <p><strong>Вывод:</strong> Критический анализ архитектуры на старте экономит время позже. Лучше потратить час на обсуждение, чем неделю на переделку. Документация — это инвестиция, которая окупается при работе в команде (даже если команда — это AI агенты).</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>🎓 Уроки (продолжение)</h3>
+                    
+                    <div class="lesson" style="background: #fff3e0; border-left-color: #ff9800;">
+                        <h4>💡 О структуре проекта</h4>
+                        <p><strong>Что узнал:</strong> Создание полной структуры проекта и документации ДО начала кодирования — отличная практика. Это помогает понять масштаб задачи и не забыть важные детали.</p>
+                        <p><strong>Вывод:</strong> Monorepo с pnpm workspace — удобный выбор для проектов с несколькими приложениями и общими пакетами. Разделение на domain/infra/apps делает код расширяемым и тестируемым.</p>
+                    </div>
+
+                    <div class="lesson" style="background: #fff3e0; border-left-color: #ff9800;">
+                        <h4>💡 О гранулярной разработке</h4>
+                        <p><strong>Что узнал:</strong> Подход с маленькими PR (300-400 строк) и четкими планами действительно помогает контролировать процесс.</p>
+                        <p><strong>Вывод:</strong> Разбиение большой задачи на маленькие шаги делает работу предсказуемой и понятной. Особенно важно для AI агентов!</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>🎓 Уроки (продолжение)</h3>
+                    
+                    <div class="lesson" style="background: #f3e5f5; border-left-color: #9c27b0;">
+                        <h4>🎨 О UX даже для внутренних инструментов</h4>
+                        <p><strong>Что узнал:</strong> При создании дневника разработки столкнулся с проблемой — контент не влезал на экран. Понадобилось несколько итераций оптимизации: уменьшение шрифтов, отступов, разбиение на под-слайды.</p>
+                        <p><strong>Вывод:</strong> UX важен даже для внутренних инструментов и документации! Презентация должна быть удобной для просмотра. Лучше разбить контент на несколько слайдов, чем пытаться втиснуть всё на один. Пользовательский опыт начинается с читаемости.</p>
+                    </div>
+
+                    <div class="joke" style="margin-top: 1.5em;">
+                        <strong>😄 Шутка:</strong> "Первый урок: всегда читай документацию. Второй урок: иногда документации нет. Третий урок: пиши документацию сам! Четвертый урок: убедись, что документацию можно прочитать!" 📝
+                    </div>
+                </section>
+
+                <section>
+                    <h3>🎓 Уроки (продолжение)</h3>
+                    <p><em>Здесь будут появляться новые уроки по мере работы над проектом...</em></p>
+                    
+                    <div class="thought" style="margin-top: 2em;">
+                        <strong>💭 Мысль:</strong> Каждый день работы приносит новые инсайты. Важно их фиксировать, чтобы не повторять ошибок и делиться опытом.
+                    </div>
+                </section>
+            </section>
+
+            <!-- Insights section -->
+            <section>
+                <section>
+                    <h2>💡 Моменты озарения</h2>
+                    <p class="date">Важные инсайты, которые изменили подход</p>
+                    
+                    <div class="insight">
+                        <h4>💡 День 1: О важности UX для внутренних инструментов</h4>
+                        <p><strong>Инсайт:</strong> Даже для внутренних инструментов (как дневник разработки) UX критически важен. Если контент не влезает на экран, это проблема, которую нужно решать, а не игнорировать.</p>
+                        <p><strong>Влияние:</strong> Это заставило пересмотреть подход к презентациям — лучше разбить на слайды, чем пытаться втиснуть всё. Применимо и к коду, и к документации.</p>
+                    </div>
+
+                    <div class="insight" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <h4>💡 О гранулярной разработке</h4>
+                        <p><strong>Инсайт:</strong> Маленькие PR (300-400 строк) — это не ограничение, а свобода. Можно экспериментировать, откатывать, не боясь сломать многое.</p>
+                        <p><strong>Влияние:</strong> Изменил подход к планированию — теперь всегда разбиваю большие задачи на маленькие шаги. Это делает работу предсказуемой.</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>💡 Моменты озарения (продолжение)</h3>
+                    <p><em>Здесь будут появляться новые важные инсайты по мере работы...</em></p>
+                    
+                    <div class="thought" style="margin-top: 2em;">
+                        <strong>💭 Мысль:</strong> Моменты озарения — это не просто "ага!", а понимание, которое меняет подход к работе. Важно их фиксировать.
+                    </div>
+                </section>
+            </section>
+
+            <!-- Bugs and fixes section -->
+            <section>
+                <section>
+                    <h2>🐛 Ошибки и как их исправили</h2>
+                    <p class="date">Учимся на ошибках</p>
+                    
+                    <div class="bug">
+                        <h4>🐛 День 1: Контент не влезал на экран</h4>
+                        <p><strong>Проблема:</strong> При создании дневника весь контент пытался втиснуть на один слайд. Результат — нечитаемо, приходилось скроллить.</p>
+                        <p><strong>Решение:</strong> Разбил длинные секции на под-слайды, уменьшил размеры шрифтов и отступов, добавил настройки масштабирования Reveal.js.</p>
+                        <p><strong>Урок:</strong> Лучше сразу планировать разбиение контента, чем потом переделывать. UX важен даже для внутренних инструментов.</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>🐛 Ошибки (продолжение)</h3>
+                    <p><em>Здесь будут появляться новые ошибки и их решения по мере работы...</em></p>
+                    
+                    <div class="thought" style="margin-top: 2em;">
+                        <strong>💭 Мысль:</strong> Ошибки — это не провал, а возможность научиться. Важно фиксировать не только что пошло не так, но и как это исправили.
+                    </div>
+                </section>
+            </section>
+
+            <!-- Questions section -->
+            <section>
+                <section>
+                    <h2>❓ Вопросы без ответов</h2>
+                    <p class="date">Что осталось непонятным</p>
+                    
+                    <div class="question">
+                        <h4>❓ SRS алгоритм — достаточно ли простой?</h4>
+                        <p>Текущий алгоритм очень простой (линейный рост интервалов). Стоит ли использовать более сложный (SM-2 как в Anki)? Или для начала простого достаточно?</p>
+                        <p><em>Статус: Отложено до реализации базовой версии</em></p>
+                    </div>
+
+                    <div class="question">
+                        <h4>❓ RLS политики — когда добавлять?</h4>
+                        <p>Нужны ли Row Level Security политики сразу, или можно добавить позже? Как это повлияет на производительность?</p>
+                        <p><em>Статус: Нужно изучить перед созданием миграций</em></p>
+                    </div>
+
+                    <div class="question">
+                        <h4>❓ Связь Web ↔ Telegram — лучший способ?</h4>
+                        <p>Текущий план — через временный код. Может быть есть более элегантное решение? OAuth? Deep links?</p>
+                        <p><em>Статус: Текущий план выглядит разумно, но стоит пересмотреть после MVP</em></p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>❓ Вопросы (продолжение)</h3>
+                    <p><em>Здесь будут появляться новые вопросы по мере работы...</em></p>
+                    
+                    <div class="thought" style="margin-top: 2em;">
+                        <strong>💭 Мысль:</strong> Вопросы без ответов — это не проблема, а список того, что нужно изучить или решить. Важно их не забывать.
+                    </div>
+                </section>
+            </section>
+
+            <!-- Notes section -->
+            <section>
+                <h2>📝 Заметки на полях</h2>
+                <ul>
+                    <li>word_pronunciations — optional, но важный пункт</li>
+                    <li>Нужно улучшить SRS алгоритм (сейчас слишком простой)</li>
+                    <li>Добавить RLS политики для безопасности</li>
+                    <li>Создать seed-скрипт для 3000 слов</li>
+                </ul>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            transition: 'slide',
+            backgroundTransition: 'fade',
+            width: 1200,
+            height: 800,
+            margin: 0.1,
+            minScale: 0.2,
+            maxScale: 1.5,
+            center: true
+        });
+
+        // Метрики (можно обновлять вручную)
+        const metrics = {
+            prCount: 0,
+            linesCount: 1000,
+            timeSpent: 2,
+            filesCount: 15,
+            testsCount: 0,
+            commitsCount: 0,
+            daysCount: 1
+        };
+
+        // Обновление метрик на странице
+        function updateMetrics() {
+            document.getElementById('pr-count').textContent = metrics.prCount;
+            document.getElementById('lines-count').textContent = metrics.linesCount.toLocaleString();
+            document.getElementById('time-spent').textContent = metrics.timeSpent + 'ч';
+            document.getElementById('files-count').textContent = metrics.filesCount;
+            document.getElementById('tests-count').textContent = metrics.testsCount;
+            document.getElementById('commits-count').textContent = metrics.commitsCount;
+            document.getElementById('days-count').textContent = metrics.daysCount;
+        }
+
+        // Инициализация графиков
+        Reveal.addEventListener('ready', function() {
+            updateMetrics();
+            initCharts();
+        });
+
+        function initCharts() {
+            // График прогресса
+            const progressCtx = document.getElementById('progressChart');
+            if (progressCtx) {
+                new Chart(progressCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['День 1', 'День 2', 'День 3', 'День 4', 'День 5'],
+                        datasets: [{
+                            label: 'Строки кода',
+                            data: [0, 0, 0, 0, 0],
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.4
+                        }, {
+                            label: 'PR создано',
+                            data: [0, 0, 0, 0, 0],
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Прогресс разработки'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // График типов PR
+            const prTypeCtx = document.getElementById('prTypeChart');
+            if (prTypeCtx) {
+                new Chart(prTypeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Feature', 'Fix', 'Docs', 'Refactor'],
+                        datasets: [{
+                            data: [0, 0, 0, 0],
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.8)',
+                                'rgba(255, 99, 132, 0.8)',
+                                'rgba(255, 206, 86, 0.8)',
+                                'rgba(75, 192, 192, 0.8)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            }
+                        }
+                    }
+                });
+            }
+
+            // График активности
+            const activityCtx = document.getElementById('activityChart');
+            if (activityCtx) {
+                new Chart(activityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                        datasets: [{
+                            label: 'Коммитов',
+                            data: [0, 0, 0, 0, 0, 0, 0],
+                            backgroundColor: 'rgba(153, 102, 255, 0.8)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Активность по дням недели'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Функция для обновления метрик (можно вызывать вручную)
+        window.updateProjectMetrics = function(newMetrics) {
+            Object.assign(metrics, newMetrics);
+            updateMetrics();
+            // Можно также обновить графики здесь
+        };
+    </script>
+</body>
+</html>
+

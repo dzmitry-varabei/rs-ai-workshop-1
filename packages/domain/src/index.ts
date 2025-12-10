@@ -13,5 +13,5 @@ export {
   type ScheduleNextReviewParams,
   type ScheduleNextReviewResult,
 } from './srs.js';
-export type { WordRepository } from './repositories.js';
+export type { WordRepository, UserWordStateRepository, UserWordStats } from './repositories.js';
 

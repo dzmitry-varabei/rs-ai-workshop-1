@@ -43,3 +43,6 @@ coverage/
 tmp/
 temp/
 
+# PR description files (auto-generated from commits)
+PR_DESCRIPTION_*.md
+

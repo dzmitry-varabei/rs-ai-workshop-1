@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { WordCard } from './components/WordCard';
 import { StatsPanel } from './components/StatsPanel';
+import { ResetModal } from './components/ResetModal';
 import { createRepositories } from './lib/repositories';
 import type { Word, WordId, UserWordStats } from '@english-learning/domain';
 import './App.css';
@@ -18,6 +19,8 @@ function AppContent() {
     learning: 0,
     knowledgePercentage: 0,
   });
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -38,8 +41,20 @@ function AppContent() {
     setLoadingWords(true);
     try {
       const repos = createRepositories();
-      const batch = await repos.wordRepository.getRandomBatch(userId, 20);
-      setWords(batch);
+      // Load more words than needed to account for already seen words
+      const batch = await repos.wordRepository.getRandomBatch(userId, 50);
+      
+      // Filter out words that user has already seen (resume functionality)
+      const unseenWords: Word[] = [];
+      for (const word of batch) {
+        const status = await repos.userWordStateRepository.getStatus(userId, word.id);
+        if (!status) {
+          unseenWords.push(word);
+          if (unseenWords.length >= 20) break; // Get 20 unseen words
+        }
+      }
+      
+      setWords(unseenWords.length > 0 ? unseenWords : batch.slice(0, 20));
       setCurrentIndex(0);
     } catch (error) {
       console.error('Failed to load words:', error);
@@ -96,6 +111,26 @@ function AppContent() {
     }
   };
 
+  const handleResetProgress = async () => {
+    if (!userId) return;
+    setResetting(true);
+    try {
+      const repos = createRepositories();
+      await repos.userWordStateRepository.resetProgress(userId);
+      // Reset local state
+      setWords([]);
+      setCurrentIndex(0);
+      await loadStats();
+      await loadWords();
+      setShowResetModal(false);
+    } catch (error) {
+      console.error('Failed to reset progress:', error);
+      alert('Failed to reset progress. Please try again.');
+    } finally {
+      setResetting(false);
+    }
+  };
+
   if (loading || loadingWords) {
     return (
       <div className="app-container">
@@ -135,6 +170,13 @@ function AppContent() {
     <div className="app-container">
       <div className="quiz-header">
         <h1>English Learning Quiz</h1>
+        <button
+          className="reset-button"
+          onClick={() => setShowResetModal(true)}
+          disabled={resetting || stats.totalSeen === 0}
+        >
+          Reset Progress
+        </button>
       </div>
       <StatsPanel
         stats={stats}
@@ -150,6 +192,11 @@ function AppContent() {
           />
         )}
       </div>
+      <ResetModal
+        isOpen={showResetModal}
+        onConfirm={handleResetProgress}
+        onCancel={() => setShowResetModal(false)}
+      />
     </div>
   );
 }

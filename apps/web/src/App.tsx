@@ -41,8 +41,20 @@ function AppContent() {
     setLoadingWords(true);
     try {
       const repos = createRepositories();
-      const batch = await repos.wordRepository.getRandomBatch(userId, 20);
-      setWords(batch);
+      // Load more words than needed to account for already seen words
+      const batch = await repos.wordRepository.getRandomBatch(userId, 50);
+      
+      // Filter out words that user has already seen (resume functionality)
+      const unseenWords: Word[] = [];
+      for (const word of batch) {
+        const status = await repos.userWordStateRepository.getStatus(userId, word.id);
+        if (!status) {
+          unseenWords.push(word);
+          if (unseenWords.length >= 20) break; // Get 20 unseen words
+        }
+      }
+      
+      setWords(unseenWords.length > 0 ? unseenWords : batch.slice(0, 20));
       setCurrentIndex(0);
     } catch (error) {
       console.error('Failed to load words:', error);

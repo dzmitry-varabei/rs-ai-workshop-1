@@ -4,6 +4,7 @@ import { WordCard } from './components/WordCard';
 import { StatsPanel } from './components/StatsPanel';
 import { ResetModal } from './components/ResetModal';
 import { createRepositories } from './lib/repositories';
+import { exportToPDF } from './lib/pdfExport';
 import type { Word, WordId, UserWordStats } from '@english-learning/domain';
 import './App.css';
 
@@ -131,6 +132,39 @@ function AppContent() {
     }
   };
 
+  const handleExportPDF = async () => {
+    if (!userId) return;
+    try {
+      const repos = createRepositories();
+      
+      // Get word IDs by status
+      const knownWordIds = await repos.userWordStateRepository.getWordIdsByStatus(userId, 'known');
+      const unknownWordIds = await repos.userWordStateRepository.getWordIdsByStatus(userId, 'unknown');
+      
+      // Get full word data
+      const knownWords = knownWordIds.length > 0 
+        ? await repos.wordRepository.getByIds(knownWordIds)
+        : [];
+      const unknownWords = unknownWordIds.length > 0
+        ? await repos.wordRepository.getByIds(unknownWordIds)
+        : [];
+      
+      // Get fresh stats
+      const freshStats = await repos.userWordStateRepository.getStats(userId);
+      
+      // Export to PDF
+      await exportToPDF({
+        knownWords,
+        unknownWords,
+        stats: freshStats,
+        exportDate: new Date(),
+      });
+    } catch (error) {
+      console.error('Failed to export PDF:', error);
+      alert('Failed to export PDF. Please try again.');
+    }
+  };
+
   if (loading || loadingWords) {
     return (
       <div className="app-container">
@@ -170,13 +204,22 @@ function AppContent() {
     <div className="app-container">
       <div className="quiz-header">
         <h1>English Learning Quiz</h1>
-        <button
-          className="reset-button"
-          onClick={() => setShowResetModal(true)}
-          disabled={resetting || stats.totalSeen === 0}
-        >
-          Reset Progress
-        </button>
+        <div className="header-actions">
+          <button
+            className="export-button"
+            onClick={handleExportPDF}
+            disabled={stats.totalSeen === 0}
+          >
+            Export PDF
+          </button>
+          <button
+            className="reset-button"
+            onClick={() => setShowResetModal(true)}
+            disabled={resetting || stats.totalSeen === 0}
+          >
+            Reset Progress
+          </button>
+        </div>
       </div>
       <StatsPanel
         stats={stats}

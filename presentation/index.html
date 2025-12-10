@@ -10,41 +10,65 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <style>
+        .reveal {
+            font-size: 32px;
+        }
         .reveal .slides section {
             text-align: left;
+            padding: 20px 60px;
         }
-        .reveal h1, .reveal h2, .reveal h3 {
+        .reveal h1 {
+            font-size: 2.2em;
             text-align: center;
+        }
+        .reveal h2 {
+            font-size: 1.6em;
+            text-align: center;
+        }
+        .reveal h3 {
+            font-size: 1.2em;
+            text-align: center;
+        }
+        .reveal p, .reveal li {
+            font-size: 0.9em;
+            line-height: 1.3;
+        }
+        .reveal ul, .reveal ol {
+            margin: 0.5em 0;
         }
         .date {
             color: #666;
-            font-size: 0.8em;
+            font-size: 0.7em;
             font-style: italic;
         }
         .thought {
             background: #f0f0f0;
-            padding: 1em;
+            padding: 0.6em 0.8em;
             border-left: 4px solid #42a5f5;
-            margin: 1em 0;
+            margin: 0.5em 0;
+            font-size: 0.85em;
         }
         .joke {
             background: #fff9c4;
-            padding: 1em;
+            padding: 0.6em 0.8em;
             border-left: 4px solid #fbc02d;
-            margin: 1em 0;
+            margin: 0.5em 0;
             font-style: italic;
+            font-size: 0.85em;
         }
         .decision {
             background: #e8f5e9;
-            padding: 1em;
+            padding: 0.6em 0.8em;
             border-left: 4px solid #4caf50;
-            margin: 1em 0;
+            margin: 0.5em 0;
+            font-size: 0.85em;
         }
         .problem {
             background: #ffebee;
-            padding: 1em;
+            padding: 0.6em 0.8em;
             border-left: 4px solid #f44336;
-            margin: 1em 0;
+            margin: 0.5em 0;
+            font-size: 0.85em;
         }
         code {
             background: #f5f5f5;
@@ -54,47 +78,50 @@
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1.5em;
-            margin: 2em 0;
+            gap: 0.8em;
+            margin: 1em 0;
         }
         .metric-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 1.5em;
-            border-radius: 10px;
+            padding: 0.8em;
+            border-radius: 8px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .metric-card h3 {
-            margin: 0 0 0.5em 0;
-            font-size: 0.9em;
+            margin: 0 0 0.3em 0;
+            font-size: 0.75em;
             opacity: 0.9;
         }
         .metric-value {
-            font-size: 2.5em;
+            font-size: 1.8em;
             font-weight: bold;
             margin: 0;
         }
         .metric-label {
-            font-size: 0.8em;
+            font-size: 0.7em;
             opacity: 0.8;
-            margin-top: 0.5em;
+            margin-top: 0.3em;
         }
         .chart-container {
             position: relative;
-            height: 400px;
-            margin: 2em 0;
+            height: 300px;
+            margin: 1em 0;
         }
         .lesson {
             background: #e3f2fd;
-            padding: 1em;
+            padding: 0.6em 0.8em;
             border-left: 4px solid #2196f3;
-            margin: 1em 0;
+            margin: 0.5em 0;
             border-radius: 4px;
+            font-size: 0.85em;
         }
         .lesson h4 {
             margin-top: 0;
+            margin-bottom: 0.3em;
             color: #1976d2;
+            font-size: 1em;
         }
     </style>
 </head>
@@ -106,11 +133,11 @@
             <section>
                 <h1>📔 Дневник разработки</h1>
                 <h2>English Learning System</h2>
-                <p style="text-align: center; margin-top: 2em;">
+                <p style="text-align: center; margin-top: 1.5em;">
                     <strong>Автор:</strong> Alex (AI Developer)<br>
                     <span class="date">Начало проекта: 2025</span>
                 </p>
-                <p style="text-align: center; margin-top: 2em; font-size: 0.8em; color: #666;">
+                <p style="text-align: center; margin-top: 1.5em; font-size: 0.7em; color: #666;">
                     Гранулярная разработка с помощью AI агентов
                 </p>
             </section>
@@ -118,7 +145,7 @@
             <!-- About me -->
             <section>
                 <h2>👋 О себе</h2>
-                <p>Привет! Я <strong>Alex</strong> — AI разработчик, работающий над системой изучения английского языка.</p>
+                <p style="margin-bottom: 0.8em;">Привет! Я <strong>Alex</strong> — AI разработчик, работающий над системой изучения английского языка.</p>
                 
                 <div class="thought">
                     <strong>Моя задача:</strong> Создать экосистему из веб-викторины и Telegram-бота с интервальным повторением, используя подход гранулярной разработки — маленькие PR, четкие планы, понятная архитектура.
@@ -164,36 +191,41 @@
                 </section>
 
                 <section>
-                    <h3>📊 Статистика дня:</h3>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1em; margin: 1em 0;">
-                        <div style="background: #e8f5e9; padding: 1em; border-radius: 8px;">
+                    <h3>📊 Статистика дня</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6em; margin: 1em 0;">
+                        <div style="background: #e8f5e9; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
                             <strong>Файлов создано:</strong> ~15
                         </div>
-                        <div style="background: #e8f5e9; padding: 1em; border-radius: 8px;">
+                        <div style="background: #e8f5e9; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
                             <strong>Строк документации:</strong> ~1000+
                         </div>
-                        <div style="background: #e8f5e9; padding: 1em; border-radius: 8px;">
+                        <div style="background: #e8f5e9; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
                             <strong>Папок создано:</strong> 10+
                         </div>
-                        <div style="background: #e8f5e9; padding: 1em; border-radius: 8px;">
+                        <div style="background: #e8f5e9; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
                             <strong>Время работы:</strong> ~2 часа
                         </div>
                     </div>
 
-                    <div class="decision" style="margin-top: 2em;">
-                        <strong>✅ Достижения:</strong> Проект полностью готов к началу разработки! Вся инфраструктура, документация и инструменты на месте. Создан первый коммит и подготовлен PR.
+                    <div class="decision" style="margin-top: 1.5em;">
+                        <strong>✅ Достижения:</strong> Проект полностью готов к началу разработки! Вся инфраструктура, документация и инструменты на месте.
                     </div>
+                </section>
 
-                    <div class="thought" style="margin-top: 1em; background: #e8f5e9;">
-                        <strong>🎉 Первый коммит:</strong> <code>feat: initial project setup</code><br>
-                        <strong>Ветка:</strong> <code>feature/initial-project-setup</code><br>
-                        <strong>Файлов изменено:</strong> 18 файлов, 2981+ строк добавлено<br>
+                <section>
+                    <h3>🎉 Первый коммит</h3>
+                    
+                    <div class="thought" style="background: #e8f5e9; font-size: 0.85em;">
+                        <strong>Коммит:</strong> <code style="font-size: 0.9em;">feat: initial project setup</code><br>
+                        <strong>Ветка:</strong> <code style="font-size: 0.9em;">feature/initial-project-setup</code><br>
+                        <strong>Файлов изменено:</strong> 18 файлов<br>
+                        <strong>Строк добавлено:</strong> 2981+<br>
                         <strong>PR:</strong> Готов к созданию на GitHub
                     </div>
 
-                    <div class="thought" style="margin-top: 2em;">
+                    <div class="thought" style="margin-top: 1.5em;">
                         <strong>📋 Следующие шаги:</strong> 
-                        <ol style="margin-top: 0.5em;">
+                        <ol style="margin-top: 0.5em; font-size: 0.9em;">
                             <li>Настроить базовые пакеты (domain, infra-supabase)</li>
                             <li>Создать миграции Supabase</li>
                             <li>Начать разработку веб-приложения</li>
@@ -253,22 +285,22 @@
                         </div>
                     </div>
 
-                    <div style="margin-top: 2em; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1em;">
-                        <div style="background: #f5f5f5; padding: 1em; border-radius: 8px;">
+                    <div style="margin-top: 1em; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6em;">
+                        <div style="background: #f5f5f5; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
                             <strong>Файлов создано:</strong> <span id="files-count">0</span>
                         </div>
-                        <div style="background: #f5f5f5; padding: 1em; border-radius: 8px;">
+                        <div style="background: #f5f5f5; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
                             <strong>Тестов написано:</strong> <span id="tests-count">0</span>
                         </div>
-                        <div style="background: #f5f5f5; padding: 1em; border-radius: 8px;">
+                        <div style="background: #f5f5f5; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
                             <strong>Коммитов:</strong> <span id="commits-count">0</span>
                         </div>
-                        <div style="background: #f5f5f5; padding: 1em; border-radius: 8px;">
+                        <div style="background: #f5f5f5; padding: 0.6em; border-radius: 6px; font-size: 0.85em;">
                             <strong>Дней работы:</strong> <span id="days-count">1</span>
                         </div>
                     </div>
 
-                    <div class="thought" style="margin-top: 2em;">
+                    <div class="thought" style="margin-top: 1em; font-size: 0.8em;">
                         <strong>💡 Примечание:</strong> Метрики обновляются вручную по мере работы. Это помогает отслеживать прогресс и видеть, сколько работы уже проделано!
                     </div>
                 </section>
@@ -281,7 +313,7 @@
                         <canvas id="progressChart"></canvas>
                     </div>
 
-                    <div class="joke" style="margin-top: 1em;">
+                    <div class="joke" style="margin-top: 0.8em; font-size: 0.8em;">
                         <strong>😄 Мысль:</strong> "График растет медленно, но верно. Как изучение английского — главное регулярность!" 📚
                     </div>
                 </section>
@@ -317,7 +349,11 @@
                         <p><strong>Что узнал:</strong> Обсуждение плана перед началом работы помогло выявить потенциальные проблемы (over-engineering, отсутствие RLS, простой SRS алгоритм). Также понял, что для учебного проекта с целью обкатки гранулярной разработки правильная архитектура важнее простоты.</p>
                         <p><strong>Вывод:</strong> Критический анализ архитектуры на старте экономит время позже. Лучше потратить час на обсуждение, чем неделю на переделку. Документация — это инвестиция, которая окупается при работе в команде (даже если команда — это AI агенты).</p>
                     </div>
+                </section>
 
+                <section>
+                    <h3>🎓 Уроки (продолжение)</h3>
+                    
                     <div class="lesson" style="background: #fff3e0; border-left-color: #ff9800;">
                         <h4>💡 О структуре проекта</h4>
                         <p><strong>Что узнал:</strong> Создание полной структуры проекта и документации ДО начала кодирования — отличная практика. Это помогает понять масштаб задачи и не забыть важные детали.</p>
@@ -329,9 +365,19 @@
                         <p><strong>Что узнал:</strong> Подход с маленькими PR (300-400 строк) и четкими планами действительно помогает контролировать процесс.</p>
                         <p><strong>Вывод:</strong> Разбиение большой задачи на маленькие шаги делает работу предсказуемой и понятной. Особенно важно для AI агентов!</p>
                     </div>
+                </section>
 
-                    <div class="joke" style="margin-top: 2em;">
-                        <strong>😄 Шутка:</strong> "Первый урок: всегда читай документацию. Второй урок: иногда документации нет. Третий урок: пиши документацию сам!" 📝
+                <section>
+                    <h3>🎓 Уроки (продолжение)</h3>
+                    
+                    <div class="lesson" style="background: #f3e5f5; border-left-color: #9c27b0;">
+                        <h4>🎨 О UX даже для внутренних инструментов</h4>
+                        <p><strong>Что узнал:</strong> При создании дневника разработки столкнулся с проблемой — контент не влезал на экран. Понадобилось несколько итераций оптимизации: уменьшение шрифтов, отступов, разбиение на под-слайды.</p>
+                        <p><strong>Вывод:</strong> UX важен даже для внутренних инструментов и документации! Презентация должна быть удобной для просмотра. Лучше разбить контент на несколько слайдов, чем пытаться втиснуть всё на один. Пользовательский опыт начинается с читаемости.</p>
+                    </div>
+
+                    <div class="joke" style="margin-top: 1.5em;">
+                        <strong>😄 Шутка:</strong> "Первый урок: всегда читай документацию. Второй урок: иногда документации нет. Третий урок: пиши документацию сам! Четвертый урок: убедись, что документацию можно прочитать!" 📝
                     </div>
                 </section>
 
@@ -364,7 +410,13 @@
         Reveal.initialize({
             hash: true,
             transition: 'slide',
-            backgroundTransition: 'fade'
+            backgroundTransition: 'fade',
+            width: 1200,
+            height: 800,
+            margin: 0.1,
+            minScale: 0.2,
+            maxScale: 1.5,
+            center: true
         });
 
         // Метрики (можно обновлять вручную)

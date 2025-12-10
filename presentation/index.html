@@ -444,6 +444,31 @@
                         <strong>💡 Автоматизация:</strong> GitHub Action автоматически обновляет описание PR из файла PR_DESCRIPTION_*.md. Это экономит время и гарантирует, что описание всегда актуально.
                     </div>
                 </section>
+
+                <section>
+                    <h3>📊 Восьмой маленький PR: UserWordStateRepository</h3>
+                    
+                    <div class="decision">
+                        <strong>✅ Создан:</strong> Репозиторий для управления состоянием слов пользователя
+                    </div>
+
+                    <ul style="font-size: 0.9em; margin-top: 1em;">
+                        <li>✅ Интерфейс UserWordStateRepository в domain пакете</li>
+                        <li>✅ Тип UserWordStats для статистики</li>
+                        <li>✅ Реализация SupabaseUserWordStateRepository</li>
+                        <li>✅ Методы: markKnown, markUnknown, getStats, getStatus, resetProgress</li>
+                        <li>✅ Логика upsert с инкрементом seen_count</li>
+                        <li>✅ Unit-тесты с моками (317 строк тестов)</li>
+                    </ul>
+
+                    <div class="thought" style="margin-top: 1em; font-size: 0.8em;">
+                        <strong>📏 Размер PR:</strong> 546 строк (163 кода + 317 тестов + 65 интерфейс) — хороший размер для репозитория. Тесты покрывают все методы и edge cases.
+                    </div>
+
+                    <div class="insight" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); margin-top: 1em; font-size: 0.8em; color: white;">
+                        <strong>💡 Upsert логика:</strong> При повторной отметке слова инкрементируем seen_count. Это важно для статистики - сколько раз пользователь видел слово.
+                    </div>
+                </section>
             </section>
 
             <!-- Template for future days -->
@@ -734,12 +759,12 @@
 
         // Метрики (можно обновлять вручную)
         const metrics = {
-            prCount: 7,
-            linesCount: 2071,
-            timeSpent: 9,
-            filesCount: 42,
-            testsCount: 307,
-            commitsCount: 9,
+            prCount: 8,
+            linesCount: 2617,
+            timeSpent: 10,
+            filesCount: 47,
+            testsCount: 624,
+            commitsCount: 10,
             daysCount: 1
         };
 

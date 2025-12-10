@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { WordCard } from './components/WordCard';
+import { StatsPanel } from './components/StatsPanel';
 import { createRepositories } from './lib/repositories';
-import type { Word, WordId } from '@english-learning/domain';
+import type { Word, WordId, UserWordStats } from '@english-learning/domain';
 import './App.css';
 
 function AppContent() {
@@ -10,12 +11,27 @@ function AppContent() {
   const [words, setWords] = useState<Word[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loadingWords, setLoadingWords] = useState(false);
+  const [stats, setStats] = useState<UserWordStats>({
+    totalSeen: 0,
+    known: 0,
+    unknown: 0,
+    learning: 0,
+    knowledgePercentage: 0,
+  });
 
   useEffect(() => {
     if (userId) {
       loadWords();
+      loadStats();
     }
   }, [userId]);
+
+  useEffect(() => {
+    // Refresh stats after each word action
+    if (userId && words.length > 0) {
+      loadStats();
+    }
+  }, [currentIndex, userId]);
 
   const loadWords = async () => {
     if (!userId) return;
@@ -32,6 +48,17 @@ function AppContent() {
     }
   };
 
+  const loadStats = async () => {
+    if (!userId) return;
+    try {
+      const repos = createRepositories();
+      const userStats = await repos.userWordStateRepository.getStats(userId);
+      setStats(userStats);
+    } catch (error) {
+      console.error('Failed to load stats:', error);
+    }
+  };
+
   const handleSwipeLeft = async () => {
     if (!userId || !words[currentIndex]) return;
     const wordId = words[currentIndex].id;
@@ -40,6 +67,7 @@ function AppContent() {
       await repos.userWordStateRepository.markUnknown(userId, wordId);
       // Optionally create SRS item for unknown word
       await repos.srsRepository.createOrGet(userId, wordId, new Date());
+      await loadStats(); // Refresh stats after marking
       nextWord();
     } catch (error) {
       console.error('Failed to mark word as unknown:', error);
@@ -52,6 +80,7 @@ function AppContent() {
     try {
       const repos = createRepositories();
       await repos.userWordStateRepository.markKnown(userId, wordId);
+      await loadStats(); // Refresh stats after marking
       nextWord();
     } catch (error) {
       console.error('Failed to mark word as known:', error);
@@ -106,10 +135,12 @@ function AppContent() {
     <div className="app-container">
       <div className="quiz-header">
         <h1>English Learning Quiz</h1>
-        <div className="progress-info">
-          Word {currentIndex + 1} of {words.length}
-        </div>
       </div>
+      <StatsPanel
+        stats={stats}
+        currentProgress={currentIndex + 1}
+        totalInBatch={words.length}
+      />
       <div className="quiz-area">
         {currentWord && (
           <WordCard

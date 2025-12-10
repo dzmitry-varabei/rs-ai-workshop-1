@@ -469,6 +469,31 @@
                         <strong>💡 Upsert логика:</strong> При повторной отметке слова инкрементируем seen_count. Это важно для статистики - сколько раз пользователь видел слово.
                     </div>
                 </section>
+
+                <section>
+                    <h3>🔄 Девятый маленький PR: SrsRepository</h3>
+                    
+                    <div class="decision">
+                        <strong>✅ Создан:</strong> Репозиторий для управления spaced repetition items
+                    </div>
+
+                    <ul style="font-size: 0.9em; margin-top: 1em;">
+                        <li>✅ Интерфейс SrsRepository в domain пакете</li>
+                        <li>✅ Тип SrsItem для данных SRS элемента</li>
+                        <li>✅ Реализация SupabaseSrsRepository</li>
+                        <li>✅ Методы: createOrGet, getDueItems, updateAfterReview, getItem, deactivate, getStats</li>
+                        <li>✅ Интеграция с scheduleNextReview из domain</li>
+                        <li>✅ Unit-тесты с моками (333 строки тестов)</li>
+                    </ul>
+
+                    <div class="thought" style="margin-top: 1em; font-size: 0.8em;">
+                        <strong>📏 Размер PR:</strong> 654 строки (223 кода + 333 теста + 91 интерфейс) — хороший размер для репозитория. Все три репозитория теперь готовы!
+                    </div>
+
+                    <div class="insight" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); margin-top: 1em; font-size: 0.8em; color: white;">
+                        <strong>💡 Интеграция с domain:</strong> Репозиторий использует функции scheduleNextReview и createInitialSrsItem из domain пакета. Это демонстрирует правильное разделение: бизнес-логика в domain, инфраструктура в infra.
+                    </div>
+                </section>
             </section>
 
             <!-- Template for future days -->
@@ -759,12 +784,12 @@
 
         // Метрики (можно обновлять вручную)
         const metrics = {
-            prCount: 8,
-            linesCount: 2617,
-            timeSpent: 10,
-            filesCount: 47,
-            testsCount: 624,
-            commitsCount: 10,
+            prCount: 9,
+            linesCount: 3271,
+            timeSpent: 11,
+            filesCount: 52,
+            testsCount: 957,
+            commitsCount: 11,
             daysCount: 1
         };
 

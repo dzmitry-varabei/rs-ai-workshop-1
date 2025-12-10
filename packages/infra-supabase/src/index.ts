@@ -6,4 +6,5 @@
  */
 
 export { createSupabaseClient } from './client.js';
+export { SupabaseWordRepository } from './repositories/word.repository.js';
 

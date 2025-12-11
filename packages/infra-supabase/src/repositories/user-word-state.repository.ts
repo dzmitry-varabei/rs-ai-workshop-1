@@ -159,5 +159,23 @@ export class SupabaseUserWordStateRepository implements UserWordStateRepository 
       throw new Error(`Failed to reset user progress: ${error.message}`);
     }
   }
+
+  async getWordIdsByStatus(userId: UserId, status: WordStatus): Promise<WordId[]> {
+    const { data, error } = await this.client
+      .from('user_word_state')
+      .select('word_id')
+      .eq('user_id', userId)
+      .eq('status', status);
+
+    if (error) {
+      throw new Error(`Failed to get word IDs by status: ${error.message}`);
+    }
+
+    if (!data) {
+      return [];
+    }
+
+    return data.map((row) => row.word_id as WordId);
+  }
 }
 

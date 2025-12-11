@@ -5,6 +5,8 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Read env vars from monorepo root so developers can keep a single .env.local
+  envDir: path.resolve(__dirname, '..', '..'),
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

@@ -94,6 +94,15 @@ export interface UserWordStateRepository {
    * @param userId - User ID
    */
   resetProgress(userId: UserId): Promise<void>;
+
+  /**
+   * Get all word IDs for a user filtered by status
+   * 
+   * @param userId - User ID
+   * @param status - Word status to filter by
+   * @returns Array of word IDs
+   */
+  getWordIdsByStatus(userId: UserId, status: WordStatus): Promise<WordId[]>;
 }
 
 /**

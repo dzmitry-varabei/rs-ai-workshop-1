@@ -5,8 +5,9 @@ The web app is a Tinder-like quiz for English words. It helps the user quickly e
 ## UI behaviour
 
 - The app shows one **card** at a time:
-  - front: English word (and optionally pronunciation / IPA later);
-  - subtle hint about controls.
+  - front: English word, example sentence (if available), level (if available);
+  - subtle hint about controls (left/right arrows);
+  - Note: Pronunciation/IPA display is planned for future implementation.
 - Controls:
   - mouse: drag card left/right;
   - keyboard: left/right arrows;

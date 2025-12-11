@@ -54,6 +54,12 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
+### 5. Enable Anonymous Auth (required for web app)
+
+1. In Supabase Dashboard: Authentication → Providers → **Anonymous**.
+2. Toggle on “Enable anonymous sign-ins” and save.
+3. Refresh the web app (or restart dev server) after enabling.
+
 ## Migration Files
 
 - `migrations/20250101000000_initial_schema.sql` - Initial schema (profiles, words, pronunciations)

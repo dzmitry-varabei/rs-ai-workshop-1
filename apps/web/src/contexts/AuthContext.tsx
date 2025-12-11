@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useMemo } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { getSupabaseClient } from '../lib/supabase';
 import type { UserId } from '@english-learning/domain';
@@ -16,12 +16,24 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = getSupabaseClient();
+  // Create supabase client once to avoid re-subscribing and spamming requests
+  const supabase = useMemo(() => getSupabaseClient(), []);
+
+  const ensureProfile = async (userId: string) => {
+    try {
+      await supabase.from('profiles').upsert({ id: userId });
+    } catch (err) {
+      console.error('Failed to upsert profile', err);
+    }
+  };
 
   useEffect(() => {
     // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user?.id) {
+        ensureProfile(session.user.id);
+      }
       setLoading(false);
     });
 
@@ -30,6 +42,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user?.id) {
+        ensureProfile(session.user.id);
+      }
       setLoading(false);
     });
 

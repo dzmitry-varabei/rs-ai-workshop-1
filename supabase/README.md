@@ -54,6 +54,18 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
+### 5. Seed Oxford 3000 words (optional)
+
+You can import the prepared list from `supabase/seed/words_oxford3000.csv` using the service role key:
+
+```bash
+# Ensure .env.local has SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
+pnpm install  # if not already
+pnpm seed:words
+```
+
+The script uses `upsert` on `text_en`, so it is safe to rerun.
+
 ### 5. Enable Anonymous Auth (required for web app)
 
 1. In Supabase Dashboard: Authentication → Providers → **Anonymous**.

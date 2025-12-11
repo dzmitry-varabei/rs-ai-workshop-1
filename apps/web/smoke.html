@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Supabase Smoke Test</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 16px;
+      }
+      button {
+        padding: 8px 12px;
+        margin-bottom: 12px;
+      }
+      pre {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 6px;
+        max-width: 800px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Supabase Smoke</h1>
+    <p>Проверка простого GET к таблице <code>words</code>.</p>
+    <button id="signin">Sign in anonymously</button>
+    <button id="signout">Sign out</button>
+  <button id="ping">Ping words</button>
+  <button id="fetch-state">Fetch user_word_state</button>
+  <button id="mark-known">Mark known (test)</button>
+    <button id="run-smoke">Run full smoke</button>
+    <div style="margin-top: 12px; font-size: 14px;">
+      <div>Session user: <span id="session-user">-</span></div>
+      <div>Words sample: <span id="words-count">-</span></div>
+      <div>State count: <span id="state-count">-</span></div>
+    </div>
+    <pre id="out">...</pre>
+
+    <script type="module">
+      import { createClient } from '@supabase/supabase-js';
+
+      const out = document.getElementById('out');
+      const url = import.meta.env.VITE_SUPABASE_URL;
+      const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const supabase = createClient(url, key);
+      const sessionSpan = document.getElementById('session-user');
+      const wordsSpan = document.getElementById('words-count');
+      const stateSpan = document.getElementById('state-count');
+
+      async function getSession() {
+        const { data } = await supabase.auth.getSession();
+        return data.session;
+      }
+
+      function log(obj) {
+        out.textContent = JSON.stringify(obj, null, 2);
+      }
+
+      async function runFullSmoke() {
+        try {
+          // 1) sign in
+          const { data: signData, error: signErr } = await supabase.auth.signInAnonymously();
+          if (signErr || !signData?.user?.id) throw new Error(signErr?.message || 'sign in failed');
+          sessionSpan.textContent = signData.user.id;
+
+          // 1.1) ensure profile exists
+          await supabase.from('profiles').upsert({ id: signData.user.id });
+
+          // 2) ping words
+          const respWords = await fetch(`${url}/rest/v1/words?select=id,text_en&limit=1`, {
+            headers: { apikey: key, Authorization: `Bearer ${signData.session?.access_token || key}` },
+          });
+          if (!respWords.ok) throw new Error(`words failed: ${respWords.status}`);
+          const words = await respWords.json();
+          wordsSpan.textContent = 'ok';
+          const wordId = words?.[0]?.id;
+          if (!wordId) throw new Error('no words to mark');
+
+          // 3) mark known
+          const respMark = await fetch(`${url}/rest/v1/user_word_state`, {
+            method: 'POST',
+            headers: {
+              apikey: key,
+              Authorization: `Bearer ${signData.session?.access_token || key}`,
+              'Content-Type': 'application/json',
+              Prefer: 'resolution=merge-duplicates',
+            },
+            body: JSON.stringify({
+              user_id: signData.user.id,
+              word_id: wordId,
+              status: 'known',
+              last_seen_at: new Date().toISOString(),
+              seen_count: 1,
+            }),
+          });
+          if (!respMark.ok) throw new Error(`mark failed: ${respMark.status}`);
+          stateSpan.textContent = 'marked';
+
+          // 4) fetch state
+          const respState = await fetch(
+            `${url}/rest/v1/user_word_state?select=status,word_id&user_id=eq.${signData.user.id}`,
+            {
+              headers: {
+                apikey: key,
+                Authorization: `Bearer ${signData.session?.access_token || key}`,
+              },
+            }
+          );
+          const stateText = await respState.text();
+          // parse JSON to count entries if possible
+          let stateCount = '-';
+          try {
+            const parsed = JSON.parse(stateText);
+            if (Array.isArray(parsed)) stateCount = parsed.length;
+          } catch (_) {
+            /* ignore */
+          }
+          log({
+            action: 'run-smoke',
+            sessionUserId: signData.user.id,
+            wordsStatus: respWords.status,
+            markStatus: respMark.status,
+            stateStatus: respState.status,
+            stateBody: stateText,
+          });
+          stateSpan.textContent = respState.ok ? String(stateCount) : 'error';
+        } catch (e) {
+          log({ action: 'run-smoke', error: e.message || String(e) });
+        }
+      }
+
+      document.getElementById('signin').addEventListener('click', async () => {
+        const { data, error } = await supabase.auth.signInAnonymously();
+        log({
+          action: 'signInAnonymously',
+          error: error?.message ?? null,
+          userId: data?.user?.id ?? null,
+        });
+        sessionSpan.textContent = data?.user?.id ?? '-';
+      });
+
+      document.getElementById('signout').addEventListener('click', async () => {
+        const { error } = await supabase.auth.signOut();
+        log({ action: 'signOut', error: error?.message ?? null });
+        sessionSpan.textContent = '-';
+        wordsSpan.textContent = '-';
+        stateSpan.textContent = '-';
+      });
+
+      document.getElementById('ping').addEventListener('click', async () => {
+        if (!url || !key) {
+          log({ error: 'Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY' });
+          return;
+        }
+        try {
+          const resp = await fetch(
+            `${url}/rest/v1/words?select=id,text_en&limit=5`,
+            {
+              headers: {
+                apikey: key,
+                Authorization: `Bearer ${key}`,
+              },
+            }
+          );
+          const text = await resp.text();
+          log({
+            status: resp.status,
+            statusText: resp.statusText,
+            body: text,
+          });
+          wordsSpan.textContent = resp.ok ? 'ok (see body)' : 'error';
+        } catch (e) {
+          log({ error: e.message || String(e) });
+          wordsSpan.textContent = 'error';
+        }
+      });
+
+      document.getElementById('fetch-state').addEventListener('click', async () => {
+        try {
+          const session = await getSession();
+          if (!session?.user?.id) {
+            log({ error: 'No session user id' });
+            stateSpan.textContent = 'no session';
+            return;
+          }
+          const resp = await fetch(
+            `${url}/rest/v1/user_word_state?select=status,word_id&user_id=eq.${session.user.id}`,
+            {
+              headers: {
+                apikey: key,
+                Authorization: `Bearer ${session.access_token}`,
+              },
+            }
+          );
+          const text = await resp.text();
+          log({
+            sessionUserId: session.user.id,
+            status: resp.status,
+            statusText: resp.statusText,
+            body: text,
+          });
+          stateSpan.textContent = resp.ok ? 'ok (see body)' : 'error';
+        } catch (e) {
+          log({ error: e.message || String(e) });
+          stateSpan.textContent = 'error';
+        }
+      });
+
+      document.getElementById('mark-known').addEventListener('click', async () => {
+        try {
+          const session = await getSession();
+          if (!session?.user?.id) {
+            log({ error: 'No session user id' });
+            stateSpan.textContent = 'no session';
+            return;
+          }
+          // берём первый word_id
+          const respWords = await fetch(
+            `${url}/rest/v1/words?select=id&limit=1`,
+            {
+              headers: {
+                apikey: key,
+                Authorization: `Bearer ${session.access_token}`,
+              },
+            }
+          );
+          const words = await respWords.json();
+          const wordId = words?.[0]?.id;
+          if (!wordId) {
+            log({ error: 'No words found to mark' });
+            stateSpan.textContent = 'no words';
+            return;
+          }
+          const resp = await fetch(`${url}/rest/v1/user_word_state`, {
+            method: 'POST',
+            headers: {
+              apikey: key,
+              Authorization: `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json',
+              Prefer: 'resolution=merge-duplicates',
+            },
+            body: JSON.stringify({
+              user_id: session.user.id,
+              word_id: wordId,
+              status: 'known',
+              last_seen_at: new Date().toISOString(),
+              seen_count: 1,
+            }),
+          });
+          const text = await resp.text();
+          log({
+            action: 'mark-known',
+            sessionUserId: session.user.id,
+            wordId,
+            status: resp.status,
+            statusText: resp.statusText,
+            body: text,
+          });
+          stateSpan.textContent = resp.ok ? 'marked' : 'error';
+        } catch (e) {
+          log({ error: e.message || String(e) });
+          stateSpan.textContent = 'error';
+        }
+      });
+
+      document.getElementById('run-smoke').addEventListener('click', runFullSmoke);
+    </script>
+  </body>
+</html>
+

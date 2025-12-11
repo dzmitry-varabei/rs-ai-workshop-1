@@ -23,30 +23,39 @@ describe('SupabaseSrsRepository', () => {
 
   describe('createOrGet', () => {
     it('should create new item when not exists', async () => {
-      const mockQuery = {
+      const existingQuery = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValue({
           data: null,
           error: { code: 'PGRST116', message: 'No rows returned' },
         }),
-        insert: vi.fn().mockReturnThis(),
       };
 
-      mockClient.from.mockReturnValue(mockQuery);
-      mockQuery.insert.mockResolvedValue({
-        data: {
-          user_id: userId,
-          word_id: wordId,
-          next_review_at: '2025-01-01T12:10:00Z',
-          last_review_at: null,
-          interval_minutes: 10,
-          difficulty_last: null,
-          review_count: 0,
-          active: true,
-        },
-        error: null,
-      });
+      const insertSelectSingle = {
+        select: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: {
+            user_id: userId,
+            word_id: wordId,
+            next_review_at: '2025-01-01T12:10:00Z',
+            last_review_at: null,
+            interval_minutes: 10,
+            difficulty_last: null,
+            review_count: 0,
+            active: true,
+          },
+          error: null,
+        }),
+      };
+
+      const insertQuery = {
+        insert: vi.fn().mockReturnValue(insertSelectSingle),
+      };
+
+      mockClient.from
+        .mockReturnValueOnce(existingQuery) // fetch existing
+        .mockReturnValueOnce(insertQuery); // insert
 
       const item = await repository.createOrGet(userId, wordId, now);
 
@@ -54,7 +63,7 @@ describe('SupabaseSrsRepository', () => {
       expect(item.wordId).toBe(wordId);
       expect(item.active).toBe(true);
       expect(item.reviewCount).toBe(0);
-      expect(mockQuery.insert).toHaveBeenCalled();
+      expect(insertQuery.insert).toHaveBeenCalled();
     });
 
     it('should return existing item when exists', async () => {
@@ -69,7 +78,7 @@ describe('SupabaseSrsRepository', () => {
         active: true,
       };
 
-      const mockQuery = {
+      const existingQuery = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValue({
@@ -78,7 +87,7 @@ describe('SupabaseSrsRepository', () => {
         }),
       };
 
-      mockClient.from.mockReturnValue(mockQuery);
+      mockClient.from.mockReturnValue(existingQuery);
 
       const item = await repository.createOrGet(userId, wordId, now);
 
@@ -86,7 +95,7 @@ describe('SupabaseSrsRepository', () => {
       expect(item.wordId).toBe(wordId);
       expect(item.reviewCount).toBe(2);
       expect(item.difficultyLast).toBe('normal');
-      expect(mockQuery.insert).not.toHaveBeenCalled();
+      // insert was never returned from mockClient.from, so implicitly not called
     });
   });
 
@@ -166,25 +175,32 @@ describe('SupabaseSrsRepository', () => {
         difficulty: 'normal',
       });
 
-      const mockQuery = {
+      const fetchQuery = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValue({
           data: { review_count: 1 },
           error: null,
         }),
-        update: vi.fn().mockReturnThis(),
       };
 
-      mockClient.from.mockReturnValue(mockQuery);
-      mockQuery.update.mockResolvedValue({
-        data: null,
-        error: null,
-      });
+      const updateQuery = {
+        update: vi.fn(),
+        eq: vi.fn(),
+      };
+
+      updateQuery.update.mockReturnValue(updateQuery);
+      updateQuery.eq
+        .mockImplementationOnce(() => updateQuery)
+        .mockResolvedValue({ data: null, error: null });
+
+      mockClient.from
+        .mockReturnValueOnce(fetchQuery) // fetch current
+        .mockReturnValueOnce(updateQuery); // update
 
       await repository.updateAfterReview(userId, wordId, scheduleResult, 'normal', now);
 
-      expect(mockQuery.update).toHaveBeenCalledWith(
+      expect(updateQuery.update).toHaveBeenCalledWith(
         expect.objectContaining({
           next_review_at: scheduleResult.nextReviewAt.toISOString(),
           last_review_at: now.toISOString(),
@@ -194,8 +210,8 @@ describe('SupabaseSrsRepository', () => {
           active: true,
         })
       );
-      expect(mockQuery.eq).toHaveBeenCalledWith('user_id', userId);
-      expect(mockQuery.eq).toHaveBeenCalledWith('word_id', wordId);
+      expect(updateQuery.eq).toHaveBeenCalledWith('user_id', userId);
+      expect(updateQuery.eq).toHaveBeenCalledWith('word_id', wordId);
     });
   });
 
@@ -251,26 +267,36 @@ describe('SupabaseSrsRepository', () => {
 
   describe('deactivate', () => {
     it('should deactivate SRS item', async () => {
-      const mockQuery = {
-        update: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockResolvedValue({
-          data: null,
-          error: null,
-        }),
+      const updateQuery = {
+        update: vi.fn(),
+        eq: vi.fn(),
       };
+      updateQuery.update.mockReturnValue(updateQuery);
+      updateQuery.eq
+        .mockImplementationOnce(() => updateQuery)
+        .mockResolvedValue({ data: null, error: null });
 
-      mockClient.from.mockReturnValue(mockQuery);
+      mockClient.from.mockReturnValue(updateQuery);
 
       await repository.deactivate(userId, wordId);
 
       expect(mockClient.from).toHaveBeenCalledWith('srs_items');
-      expect(mockQuery.update).toHaveBeenCalledWith({ active: false });
-      expect(mockQuery.eq).toHaveBeenCalledWith('user_id', userId);
-      expect(mockQuery.eq).toHaveBeenCalledWith('word_id', wordId);
+      expect(updateQuery.update).toHaveBeenCalledWith({ active: false });
+      expect(updateQuery.eq).toHaveBeenCalledWith('user_id', userId);
+      expect(updateQuery.eq).toHaveBeenCalledWith('word_id', wordId);
     });
   });
 
   describe('getStats', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(now);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it('should calculate stats correctly', async () => {
       const items = [
         {
@@ -290,7 +316,7 @@ describe('SupabaseSrsRepository', () => {
         },
       ];
 
-      const mockQuery = {
+      const statsQuery = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockResolvedValue({
           data: items,
@@ -298,7 +324,7 @@ describe('SupabaseSrsRepository', () => {
         }),
       };
 
-      mockClient.from.mockReturnValue(mockQuery);
+      mockClient.from.mockReturnValue(statsQuery);
 
       const stats = await repository.getStats(userId);
 

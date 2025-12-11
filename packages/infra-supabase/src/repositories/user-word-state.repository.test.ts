@@ -228,8 +228,8 @@ describe('SupabaseUserWordStateRepository', () => {
       const mockQuery = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValue({
-          data: { status: 'known' },
+        limit: vi.fn().mockResolvedValue({
+          data: [{ status: 'known' }],
           error: null,
         }),
       };
@@ -247,9 +247,9 @@ describe('SupabaseUserWordStateRepository', () => {
       const mockQuery = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValue({
-          data: null,
-          error: { code: 'PGRST116', message: 'No rows returned' },
+        limit: vi.fn().mockResolvedValue({
+          data: [],
+          error: null,
         }),
       };
 
@@ -264,7 +264,7 @@ describe('SupabaseUserWordStateRepository', () => {
       const mockQuery = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValue({
+        limit: vi.fn().mockResolvedValue({
           data: null,
           error: { code: 'OTHER_ERROR', message: 'Database error' },
         }),

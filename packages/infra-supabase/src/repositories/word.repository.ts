@@ -31,12 +31,27 @@ export class SupabaseWordRepository implements WordRepository {
   constructor(private readonly client: SupabaseClient) {}
 
   async getRandomBatch(userId: UserId, limit: number): Promise<Word[]> {
-    // Get random words using PostgreSQL random() function
+    // PostgREST не поддерживает order по random(), поэтому делаем случайный offset
+    const safeLimit = Math.max(1, limit);
+
+    const { count, error: countError } = await this.client
+      .from('words')
+      .select('id', { count: 'exact', head: true });
+
+    if (countError) {
+      throw new Error(`Failed to count words: ${countError.message}`);
+    }
+
+    const total = count ?? 0;
+    if (total === 0) return [];
+
+    const maxOffset = Math.max(total - safeLimit, 0);
+    const offset = Math.floor(Math.random() * (maxOffset + 1));
+
     const { data, error } = await this.client
       .from('words')
       .select('id, text_en, level, example_en, example_ru, tags, extra')
-      .order('random()')
-      .limit(limit);
+      .range(offset, offset + safeLimit - 1);
 
     if (error) {
       throw new Error(`Failed to fetch random words: ${error.message}`);

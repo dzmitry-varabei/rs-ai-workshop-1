@@ -44,6 +44,7 @@ function AppContent() {
       const repos = createRepositories();
       // Load more words than needed to account for already seen words
       const batch = await repos.wordRepository.getRandomBatch(userId, 50);
+      console.debug('loadWords: batch size', batch.length);
       
       // Filter out words that user has already seen (resume functionality)
       const unseenWords: Word[] = [];
@@ -54,7 +55,7 @@ function AppContent() {
           if (unseenWords.length >= 20) break; // Get 20 unseen words
         }
       }
-      
+      console.debug('loadWords: unseen size', unseenWords.length);
       setWords(unseenWords.length > 0 ? unseenWords : batch.slice(0, 20));
       setCurrentIndex(0);
     } catch (error) {

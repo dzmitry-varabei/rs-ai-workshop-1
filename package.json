@@ -10,9 +10,13 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
+    "seed:words": "node scripts/seed-words.js",
     "check": "pnpm lint && pnpm typecheck && pnpm test"
   },
   "devDependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "csv-parse": "^5.5.6",
+    "dotenv": "^16.4.5",
     "typescript": "^5.3.0"
   },
   "engines": {

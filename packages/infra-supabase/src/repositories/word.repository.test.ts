@@ -41,17 +41,12 @@ describe('SupabaseWordRepository', () => {
         },
       ];
 
-      const mockSelect = vi.fn().mockReturnThis();
-      const mockOrder = vi.fn().mockReturnThis();
-      const mockLimit = vi.fn().mockResolvedValue({ data: mockWords, error: null });
-
-      const mockFrom = vi.fn().mockReturnValue({
-        select: mockSelect,
-        order: mockOrder,
-        limit: mockLimit,
-      });
-
-      (mockClient.from as ReturnType<typeof vi.fn>).mockImplementation(mockFrom);
+      const countSelect = vi.fn().mockResolvedValue({ count: 1, error: null });
+      const range = vi.fn().mockResolvedValue({ data: mockWords, error: null });
+      const wordQuery = {
+        select: vi.fn().mockReturnThis(),
+        range,
+      };
 
       // Mock pronunciations query
       const mockPronSelect = vi.fn().mockReturnThis();
@@ -60,19 +55,18 @@ describe('SupabaseWordRepository', () => {
         error: null,
       });
 
-      mockFrom.mockImplementation((table: string) => {
-        if (table === 'word_pronunciations') {
-          return {
-            select: mockPronSelect,
-            in: mockPronIn,
-          };
-        }
-        return {
-          select: mockSelect,
-          order: mockOrder,
-          limit: mockLimit,
-        };
-      });
+      (mockClient.from as ReturnType<typeof vi.fn>)
+        // count query
+        .mockReturnValueOnce({
+          select: countSelect,
+        })
+        // words query with range
+        .mockReturnValueOnce(wordQuery)
+        // pronunciations query
+        .mockReturnValueOnce({
+          select: mockPronSelect,
+          in: mockPronIn,
+        });
 
       const result = await repository.getRandomBatch(mockUserId, 1);
 
@@ -85,14 +79,9 @@ describe('SupabaseWordRepository', () => {
     });
 
     it('should handle empty result', async () => {
-      const mockSelect = vi.fn().mockReturnThis();
-      const mockOrder = vi.fn().mockReturnThis();
-      const mockLimit = vi.fn().mockResolvedValue({ data: [], error: null });
-
-      (mockClient.from as ReturnType<typeof vi.fn>).mockReturnValue({
-        select: mockSelect,
-        order: mockOrder,
-        limit: mockLimit,
+      const countSelect = vi.fn().mockResolvedValue({ count: 0, error: null });
+      (mockClient.from as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+        select: countSelect,
       });
 
       const result = await repository.getRandomBatch(mockUserId, 10);
@@ -101,18 +90,19 @@ describe('SupabaseWordRepository', () => {
     });
 
     it('should throw error on database error', async () => {
-      const mockSelect = vi.fn().mockReturnThis();
-      const mockOrder = vi.fn().mockReturnThis();
-      const mockLimit = vi.fn().mockResolvedValue({
+      const countSelect = vi.fn().mockResolvedValue({ count: 5, error: null });
+      const range = vi.fn().mockResolvedValue({
         data: null,
         error: { message: 'Database error' },
       });
+      const wordQuery = {
+        select: vi.fn().mockReturnThis(),
+        range,
+      };
 
-      (mockClient.from as ReturnType<typeof vi.fn>).mockReturnValue({
-        select: mockSelect,
-        order: mockOrder,
-        limit: mockLimit,
-      });
+      (mockClient.from as ReturnType<typeof vi.fn>)
+        .mockReturnValueOnce({ select: countSelect })
+        .mockReturnValueOnce(wordQuery);
 
       await expect(repository.getRandomBatch(mockUserId, 10)).rejects.toThrow(
         'Failed to fetch random words'

@@ -136,17 +136,17 @@ export class SupabaseUserWordStateRepository implements UserWordStateRepository 
       .select('status')
       .eq('user_id', userId)
       .eq('word_id', wordId)
-      .single();
+      .limit(1);
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        // No rows returned
-        return null;
-      }
       throw new Error(`Failed to get word status: ${error.message}`);
     }
 
-    return data?.status ?? null;
+    if (!data || data.length === 0) {
+      return null;
+    }
+
+    return data[0]?.status ?? null;
   }
 
   async resetProgress(userId: UserId): Promise<void> {
@@ -178,4 +178,5 @@ export class SupabaseUserWordStateRepository implements UserWordStateRepository 
     return data.map((row) => row.word_id as WordId);
   }
 }
+
 

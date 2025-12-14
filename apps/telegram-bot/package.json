@@ -1,0 +1,39 @@
+{
+  "name": "@english-learning/telegram-bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Telegram bot for spaced repetition English vocabulary learning",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext ts --report-unused-disable-directives --max-warnings 0"
+  },
+  "dependencies": {
+    "@english-learning/domain": "workspace:*",
+    "@english-learning/infra-supabase": "workspace:*",
+    "@supabase/supabase-js": "^2.39.0",
+    "telegraf": "^4.15.6",
+    "dotenv": "^16.4.5",
+    "date-fns": "^3.0.6",
+    "date-fns-tz": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.6.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "fast-check": "^3.15.0",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "prettier": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

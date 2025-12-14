@@ -97,6 +97,9 @@ describe('Pause State Enforcement', () => {
           action: fc.oneof(fc.constant('pause'), fc.constant('resume')),
         }),
         async ({ userId, chatId, initialPausedState, action }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup user profile with initial pause state
           const profile: UserProfile = {
             userId,
@@ -193,6 +196,9 @@ describe('Pause State Enforcement', () => {
           repeatCount: fc.integer({ min: 2, max: 5 }),
         }),
         async ({ userId, chatId, action, repeatCount }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup user profile with opposite state to the action
           const initialPausedState = action === 'resume'; // If resuming, start paused
           const profile: UserProfile = {
@@ -269,6 +275,9 @@ describe('Pause State Enforcement', () => {
           overdueCount: fc.integer({ min: 0, max: 50 }),
         }),
         async ({ userId, chatId, overdueCount }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup paused user profile
           const profile: UserProfile = {
             userId,
@@ -343,6 +352,9 @@ describe('Pause State Enforcement', () => {
           ),
         }),
         async ({ userId, chatId, action, errorType }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup user profile with appropriate initial state
           const profile: UserProfile = {
             userId,

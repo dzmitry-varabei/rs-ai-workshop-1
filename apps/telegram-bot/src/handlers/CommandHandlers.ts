@@ -29,7 +29,7 @@ export class CommandHandlers {
     try {
       const chatId = ctx.chat?.id?.toString();
       if (!chatId) {
-        await ctx.reply(this.messageFormatter.formatError('Unable to identify chat'));
+        await ctx.reply(this.messageFormatter.formatError('Unable to identify chat'), { parse_mode: 'MarkdownV2' });
         return;
       }
 
@@ -63,7 +63,7 @@ export class CommandHandlers {
       await ctx.reply(helpMessage, { parse_mode: 'MarkdownV2' });
     } catch (error) {
       console.error('Error in handleHelp:', error);
-      await ctx.reply(this.messageFormatter.formatError('Unable to show help. Please try again.'));
+      await ctx.reply(this.messageFormatter.formatError('Unable to show help. Please try again.'), { parse_mode: 'MarkdownV2' });
     }
   }
 
@@ -74,7 +74,7 @@ export class CommandHandlers {
     try {
       const chatId = ctx.chat?.id?.toString();
       if (!chatId) {
-        await ctx.reply(this.messageFormatter.formatError('Unable to identify chat'));
+        await ctx.reply(this.messageFormatter.formatError('Unable to identify chat'), { parse_mode: 'MarkdownV2' });
         return;
       }
 
@@ -194,7 +194,7 @@ export class CommandHandlers {
       await ctx.reply(statsMessage, { parse_mode: 'MarkdownV2' });
     } catch (error) {
       console.error('Error in handleStats:', error);
-      await ctx.reply(this.messageFormatter.formatError('Unable to load statistics. Please try again.'));
+      await ctx.reply(this.messageFormatter.formatError('Unable to load statistics. Please try again.'), { parse_mode: 'MarkdownV2' });
     }
   }
 
@@ -220,7 +220,7 @@ export class CommandHandlers {
       await ctx.reply(confirmationMessage, { parse_mode: 'MarkdownV2' });
     } catch (error) {
       console.error('Error in handlePause:', error);
-      await ctx.reply(this.messageFormatter.formatError('Unable to pause reviews. Please try again.'));
+      await ctx.reply(this.messageFormatter.formatError('Unable to pause reviews. Please try again.'), { parse_mode: 'MarkdownV2' });
     }
   }
 
@@ -250,7 +250,7 @@ export class CommandHandlers {
       await ctx.reply(confirmationMessage, { parse_mode: 'MarkdownV2' });
     } catch (error) {
       console.error('Error in handleResume:', error);
-      await ctx.reply(this.messageFormatter.formatError('Unable to resume reviews. Please try again.'));
+      await ctx.reply(this.messageFormatter.formatError('Unable to resume reviews. Please try again.'), { parse_mode: 'MarkdownV2' });
     }
   }
 
@@ -266,7 +266,7 @@ export class CommandHandlers {
       await ctx.reply(settingsMessage, { parse_mode: 'MarkdownV2' });
     } catch (error) {
       console.error('Error in handleSettings:', error);
-      await ctx.reply(this.messageFormatter.formatError('Unable to load settings. Please try again.'));
+      await ctx.reply(this.messageFormatter.formatError('Unable to load settings. Please try again.'), { parse_mode: 'MarkdownV2' });
     }
   }
 
@@ -318,11 +318,12 @@ export class CommandHandlers {
    */
   async filterCommand(command: string, ctx: Context): Promise<boolean> {
     try {
-      const chatId = ctx.chat?.id?.toString();
-      if (!chatId || chatId.trim() === '' || isNaN(parseInt(chatId))) {
+      const rawChatId = ctx.chat?.id?.toString();
+      if (!rawChatId || rawChatId.trim() === '' || isNaN(parseInt(rawChatId))) {
         return false;
       }
 
+      const chatId = rawChatId.trim();
       const profile = await this.userProfileRepository.getProfileByChatId(chatId);
       
       // Commands available to unlinked users

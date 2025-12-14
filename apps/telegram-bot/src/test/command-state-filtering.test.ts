@@ -104,6 +104,9 @@ describe('Command State Filtering', () => {
           isPaused: fc.boolean(),
         }),
         async ({ chatId, command, isLinked, isPaused }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup mock context
           const mockCtx = {
             chat: { id: parseInt(chatId) },
@@ -159,6 +162,9 @@ describe('Command State Filtering', () => {
           ),
         }),
         async ({ chatId, command }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup mock context
           const mockCtx = {
             chat: { id: parseInt(chatId) },
@@ -208,6 +214,9 @@ describe('Command State Filtering', () => {
           chatId: fc.option(fc.string({ minLength: 1, maxLength: 20 }), { nil: null }),
         }),
         async ({ command, hasChat, chatId }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup mock context with potentially invalid chat
           const mockCtx = {
             chat: hasChat && chatId ? { id: parseInt(chatId) } : undefined,
@@ -216,7 +225,9 @@ describe('Command State Filtering', () => {
           // Test command filtering
           const allowed = await commandHandlers.filterCommand(command, mockCtx);
 
-          if (!hasChat || !chatId) {
+          const isValidChatId = hasChat && chatId && chatId.trim() !== '' && !isNaN(parseInt(chatId));
+          
+          if (!isValidChatId) {
             // Should reject commands for invalid chat IDs
             expect(allowed).toBe(false);
             // Repository should not be called for invalid chat IDs
@@ -252,6 +263,9 @@ describe('Command State Filtering', () => {
           ),
         }),
         async ({ chatId, baseCommand, caseVariation }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Apply case variation
           let command = baseCommand;
           if (caseVariation === 'upper') {
@@ -302,6 +316,9 @@ describe('Command State Filtering', () => {
           ),
         }),
         async ({ chatId, command, errorType }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup mock context
           const mockCtx = {
             chat: { id: parseInt(chatId) },

@@ -54,7 +54,7 @@ export class SupabaseUserProfileRepository implements UserProfileRepository {
       dbUpdates.timezone = updates.timezone;
     }
     if (updates.dailyWordLimit !== undefined) {
-      dbUpdates.daily_limit = updates.dailyWordLimit;
+      dbUpdates.daily_word_limit = updates.dailyWordLimit;
     }
 
     const { error } = await this.supabase
@@ -82,7 +82,7 @@ export class SupabaseUserProfileRepository implements UserProfileRepository {
       id: data.id,
       telegramChatId: data.telegram_chat_id,
       timezone: data.timezone || 'UTC',
-      dailyWordLimit: data.daily_limit || 20,
+      dailyWordLimit: data.daily_word_limit || 20,
       preferredWindow: {
         start: data.preferred_window_start || '09:00',
         end: data.preferred_window_end || '21:00',

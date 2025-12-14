@@ -184,7 +184,7 @@ export class BotSrsRepository {
     // Get user's daily limit
     const { data: profile, error: profileError } = await this.supabase
       .from('profiles')
-      .select('daily_limit')
+      .select('daily_word_limit')
       .eq('id', userId)
       .single();
 
@@ -192,7 +192,7 @@ export class BotSrsRepository {
       throw new Error(`Failed to get user profile: ${profileError.message}`);
     }
 
-    const dailyLimit = profile?.daily_limit ?? 20;
+    const dailyLimit = profile?.daily_word_limit ?? 20;
 
     // Count today's reviews
     const { count, error } = await this.supabase
@@ -249,5 +249,42 @@ export class BotSrsRepository {
     }
 
     return currentTimeMinutes >= windowStart && currentTimeMinutes <= windowEnd;
+  }
+
+  /**
+   * Get total count of SRS items for a user
+   */
+  async getTotalItemsCount(userId: UserId): Promise<number> {
+    const { count, error } = await this.supabase
+      .from('srs_items')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (error) {
+      throw new Error(`Failed to get total items count: ${error.message}`);
+    }
+
+    return count ?? 0;
+  }
+
+  /**
+   * Get count of items due today for a user
+   */
+  async getDueTodayCount(userId: UserId, date: Date = new Date()): Promise<number> {
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
+
+    const { count, error } = await this.supabase
+      .from('srs_items')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .gte('next_review_at', startOfDay.toISOString())
+      .lt('next_review_at', endOfDay.toISOString());
+
+    if (error) {
+      throw new Error(`Failed to get due today count: ${error.message}`);
+    }
+
+    return count ?? 0;
   }
 }

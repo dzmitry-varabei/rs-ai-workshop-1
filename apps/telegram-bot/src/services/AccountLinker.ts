@@ -1,29 +1,30 @@
 /**
  * Service for handling account linking between web and Telegram
- * Implements validation, rate limiting, and secure linking process
+ * Manages link codes, validation, and rate limiting
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AccountLinker } from '../domain/interfaces';
-import type { LinkCodeValidation } from '../domain/types';
-import { SupabaseLinkCodeRepository, SupabaseLinkAttemptRepository } from '../repositories';
+import type {
+  LinkCodeRepository,
+  LinkAttemptRepository,
+  UserProfileRepository,
+} from '../domain/interfaces';
+import type { LinkCodeValidation, UserId } from '../domain/types';
 
 export class AccountLinkerService implements AccountLinker {
-  private linkCodeRepo: SupabaseLinkCodeRepository;
-  private linkAttemptRepo: SupabaseLinkAttemptRepository;
-
-  constructor(private supabase: SupabaseClient) {
-    this.linkCodeRepo = new SupabaseLinkCodeRepository(supabase);
-    this.linkAttemptRepo = new SupabaseLinkAttemptRepository(supabase);
-  }
+  constructor(
+    private readonly linkCodeRepo: LinkCodeRepository,
+    private readonly linkAttemptRepo: LinkAttemptRepository,
+    private readonly userProfileRepo: UserProfileRepository
+  ) {}
 
   async validateLinkCode(code: string): Promise<LinkCodeValidation> {
-    // Check format: must be exactly 8 characters, alphanumeric
-    if (!/^[A-Z0-9]{8}$/.test(code)) {
-      return { isValid: false, error: 'not_found' };
-    }
-
     try {
+      // Check format: must be exactly 8 characters, alphanumeric
+      if (!/^[A-Z0-9]{8}$/.test(code)) {
+        return { isValid: false, error: 'not_found' };
+      }
+
       const linkCode = await this.linkCodeRepo.getLinkCode(code);
       
       if (!linkCode) {
@@ -49,24 +50,18 @@ export class AccountLinkerService implements AccountLinker {
 
   async linkAccount(code: string, telegramChatId: string): Promise<boolean> {
     try {
-      // First validate the code
+      // Validate the code first
       const validation = await this.validateLinkCode(code);
       if (!validation.isValid || !validation.userId) {
         return false;
       }
 
       // Update user profile with Telegram chat ID
-      const { error: profileError } = await this.supabase
-        .from('profiles')
-        .update({ telegram_chat_id: telegramChatId })
-        .eq('id', validation.userId);
+      await this.userProfileRepo.updateProfile(validation.userId, {
+        telegramChatId,
+      });
 
-      if (profileError) {
-        console.error('Error updating profile:', profileError);
-        return false;
-      }
-
-      // Mark the link code as used
+      // Mark the code as used
       await this.linkCodeRepo.markUsed(code);
 
       return true;
@@ -86,18 +81,16 @@ export class AccountLinkerService implements AccountLinker {
       });
     } catch (error) {
       console.error('Error recording link attempt:', error);
-      // Don't throw - this is logging, not critical functionality
     }
   }
 
   async isRateLimited(chatId: string): Promise<boolean> {
     try {
-      const failedCount = await this.getFailedAttempts(chatId);
-      return failedCount >= 5;
+      const failedAttempts = await this.getFailedAttempts(chatId);
+      return failedAttempts >= 5;
     } catch (error) {
       console.error('Error checking rate limit:', error);
-      // On error, assume not rate limited to avoid blocking legitimate users
-      return false;
+      return false; // On error, don't block the user
     }
   }
 

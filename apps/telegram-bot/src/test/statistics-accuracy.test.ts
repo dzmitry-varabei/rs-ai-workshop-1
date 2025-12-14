@@ -107,6 +107,9 @@ describe('Statistics Accuracy', () => {
           })
         ),
         async ({ userId, chatId, totalItems, dueToday, successRate, learningStreak }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup user profile
           const profile = {
             userId,
@@ -184,6 +187,9 @@ describe('Statistics Accuracy', () => {
           })
         ),
         async ({ userId, chatId, stats, callCount }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup user profile
           const profile = {
             userId,
@@ -252,6 +258,9 @@ describe('Statistics Accuracy', () => {
           })
         ),
         async ({ userId, chatId, totalItems, dueToday, successRate, learningStreak }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup user profile
           const profile = {
             userId,
@@ -315,6 +324,9 @@ describe('Statistics Accuracy', () => {
           ),
         }),
         async ({ userId, chatId, errorType }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup user profile
           const profile = {
             userId,
@@ -366,6 +378,9 @@ describe('Statistics Accuracy', () => {
           chatId: fc.integer({ min: 1, max: 999999999 }).map(id => id.toString()),
         }),
         async ({ userId, chatId }) => {
+          // Reset mocks for this iteration
+          vi.clearAllMocks();
+          
           // Setup user profile
           const profile = {
             userId,

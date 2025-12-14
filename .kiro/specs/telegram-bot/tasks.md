@@ -34,7 +34,7 @@
   - **Property 8: SRS Interval Calculation**
   - **Validates: Requirements 3.2**
 
-- [ ] 3. Implement Supabase repository layer
+- [x] 3. Implement Supabase repository layer
   - Create LinkCodeRepository with validation and rate limiting methods
   - Create ReviewEventRepository for statistics tracking
   - Extend existing SrsRepository with bot-specific state management methods
@@ -42,15 +42,15 @@
   - Implement atomic operations using Postgres RPC functions
   - _Requirements: 1.2, 1.4, 1.5, 3.2, 3.3, 5.1, 5.2_
 
-- [ ] 3.1 Write property test for link code validation
+- [x] 3.1 Write property test for link code validation
   - **Property 3: Invalid Link Code Rejection**
   - **Validates: Requirements 1.4**
 
-- [ ] 3.2 Write property test for rate limiting
+- [x] 3.2 Write property test for rate limiting
   - **Property 2: Link Code Rate Limiting**
   - **Validates: Requirements 1.5**
 
-- [ ] 3.3 Write property test for atomic SRS updates
+- [x] 3.3 Write property test for atomic SRS updates
   - **Property 9: Atomic Schedule Updates**
   - **Validates: Requirements 3.3**
 
@@ -92,7 +92,7 @@
 
 - [x] 6. Checkpoint - Ensure all tests pass, ask the user if questions arise
 
-- [ ] 7. Implement command handlers
+- [x] 7. Implement command handlers
   - Create /start command handler with conditional welcome messages
   - Create /help command handler with command descriptions
   - Create /link command handler with linking instructions
@@ -101,19 +101,19 @@
   - Create /settings command handler with current configuration display
   - _Requirements: 8.1, 8.2, 8.3, 5.1, 5.2, 5.3, 5.4, 6.1, 6.3, 8.4_
 
-- [ ] 7.1 Write property test for command state filtering
+- [x] 7.1 Write property test for command state filtering
   - **Property 22: Command State Filtering**
   - **Validates: Requirements 8.6**
 
-- [ ] 7.2 Write property test for statistics accuracy
+- [x] 7.2 Write property test for statistics accuracy
   - **Property 17: Statistics Accuracy**
   - **Validates: Requirements 5.1, 5.2, 5.3, 5.4**
 
-- [ ] 7.3 Write property test for pause state enforcement
+- [x] 7.3 Write property test for pause state enforcement
   - **Property 18: Pause State Enforcement**
   - **Validates: Requirements 6.2**
 
-- [ ] 8. Implement callback query handling
+- [x] 8. Implement callback query handling
   - Create callback handler for difficulty button presses
   - Implement callback validation against active reviews
   - Handle duplicate callback queries with idempotency
@@ -121,15 +121,15 @@
   - Edit messages to remove keyboards and show selected difficulty
   - _Requirements: 3.1, 3.4, 3.6_
 
-- [ ] 8.1 Write property test for callback validation
+- [x] 8.1 Write property test for callback validation
   - **Property 10: Callback Validation and Response**
   - **Validates: Requirements 3.1, 3.4**
 
-- [ ] 8.2 Write property test for duplicate callback handling
+- [x] 8.2 Write property test for duplicate callback handling
   - **Property 12: Duplicate Callback Handling**
   - **Validates: Requirements 3.6**
 
-- [ ] 9. Implement review scheduler
+- [x] 9. Implement review scheduler
   - Create scheduler service that runs every 60 seconds
   - Implement due review selection with user preferences filtering
   - Add atomic review claiming to prevent race conditions
@@ -137,38 +137,38 @@
   - Implement daily limit tracking and overflow handling
   - _Requirements: 2.1, 2.4, 2.6, 3.5, 4.2, 4.3, 4.4_
 
-- [ ] 9.1 Write property test for atomic review claiming
+- [x] 9.1 Write property test for atomic review claiming
   - **Property 4: Atomic Review Claiming**
   - **Validates: Requirements 2.1, 2.6**
 
-- [ ] 9.2 Write property test for timeout handling
+- [x] 9.2 Write property test for timeout handling
   - **Property 11: Timeout Handling**
   - **Validates: Requirements 3.5**
 
-- [ ] 9.3 Write property test for limit overflow handling
+- [x] 9.3 Write property test for limit overflow handling
   - **Property 15: Limit Overflow Handling**
   - **Validates: Requirements 4.4**
 
-- [ ] 10. Implement pause/resume functionality
+- [x] 10. Implement pause/resume functionality
   - Add pause state checking in scheduler
   - Implement resume processing with backlog handling
   - Handle long pause scenarios (7+ days, 30+ days)
   - Add confirmation messages for state changes
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
 
-- [ ] 10.1 Write property test for resume processing
+- [x] 10.1 Write property test for resume processing
   - **Property 19: Resume Processing**
   - **Validates: Requirements 6.3**
 
-- [ ] 10.2 Write property test for long pause handling
+- [x] 10.2 Write property test for long pause handling
   - **Property 20: Long Pause Handling**
   - **Validates: Requirements 6.4**
 
-- [ ] 10.3 Write property test for extended pause reset
+- [x] 10.3 Write property test for extended pause reset
   - **Property 21: Extended Pause Reset**
   - **Validates: Requirements 6.6**
 
-- [ ] 11. Implement bot controller and main application
+- [x] 11. Implement bot controller and main application
   - Create main bot controller with polling setup
   - Wire all handlers and services together
   - Implement graceful shutdown handling
@@ -176,19 +176,19 @@
   - Create environment configuration management
   - _Requirements: 7.1, 7.2, 7.4, 10.1, 10.2, 10.3_
 
-- [ ] 11.1 Write property test for default configuration
+- [x] 11.1 Write property test for default configuration
   - **Property 16: Default Configuration**
   - **Validates: Requirements 4.5**
 
-- [ ] 11.2 Write property test for settings display
+- [x] 11.2 Write property test for settings display
   - **Property 23: Settings Display Completeness**
   - **Validates: Requirements 8.4**
 
-- [ ] 11.3 Write property test for unknown command handling
+- [x] 11.3 Write property test for unknown command handling
   - **Property 24: Unknown Command Handling**
   - **Validates: Requirements 8.5**
 
-- [ ] 12. Add comprehensive error handling
+- [x] 12. Add comprehensive error handling
   - Implement error recovery mechanisms for all failure scenarios
   - Add circuit breaker pattern for external service calls
   - Create cleanup jobs for inconsistent states
@@ -196,7 +196,7 @@
   - Implement graceful degradation strategies
   - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-- [ ] 12.1 Write integration tests for error scenarios
+- [x] 12.1 Write integration tests for error scenarios
   - Test database connection failures and recovery
   - Test Telegram API failures and retries
   - Test malformed user input handling

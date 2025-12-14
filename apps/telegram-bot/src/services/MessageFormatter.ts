@@ -22,6 +22,7 @@ export class MessageFormatter implements IMessageFormatter {
 
   /**
    * Format a word review message with proper MarkdownV2 escaping
+   * Handles missing data gracefully (no example, no translation, no pronunciation)
    */
   formatReview(word: Word, pronunciation?: Pronunciation): string {
     const escapedWord = this.escapeMarkdownV2(word.text);
@@ -34,7 +35,7 @@ export class MessageFormatter implements IMessageFormatter {
       message += ` /${escapedIpa}/`;
     }
     
-    // Add example sentence if available
+    // Add example sentence if available, otherwise provide a helpful message
     if (word.exampleEn) {
       const escapedExample = this.escapeMarkdownV2(word.exampleEn);
       // Highlight the word in the example by making it bold
@@ -48,15 +49,21 @@ export class MessageFormatter implements IMessageFormatter {
         // If regex fails, just add the example without highlighting
         message += `\n\n${escapedExample}`;
       }
+    } else {
+      // Provide helpful message when no example is available
+      message += `\n\n_No example sentence available\\. Try to think of your own\\!_`;
     }
     
     // Add Russian translation in spoiler format if available
     if (word.exampleRu) {
       const escapedTranslation = this.escapeMarkdownV2(word.exampleRu);
       message += `\n\n||${escapedTranslation}||`;
+    } else if (word.exampleEn) {
+      // If we have English example but no Russian translation
+      message += `\n\n||Translation not available||`;
     } else {
-      // Fallback message if no translation available
-      message += `\n\n||Перевод недоступен||`;
+      // If we have neither example nor translation, provide a more encouraging message
+      message += `\n\n||Think about what this word means to you||`;
     }
     
     // Add level information if available
@@ -170,6 +177,26 @@ export class MessageFormatter implements IMessageFormatter {
           { text: '😎 Easy', callback_data: `difficulty:${userId}:${wordId}:easy` }
         ]
       ]
+    };
+  }
+
+  /**
+   * Create inline keyboard with single button (for confirmations, etc.)
+   */
+  createSingleButtonKeyboard(text: string, callbackData: string): unknown {
+    return {
+      inline_keyboard: [
+        [{ text, callback_data: callbackData }]
+      ]
+    };
+  }
+
+  /**
+   * Create empty inline keyboard (removes existing keyboard)
+   */
+  createEmptyKeyboard(): unknown {
+    return {
+      inline_keyboard: []
     };
   }
 

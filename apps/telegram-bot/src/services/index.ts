@@ -8,3 +8,10 @@ export { DueReviewSelectorService } from './DueReviewSelector';
 export { ReviewDeliveryServiceImpl } from './ReviewDeliveryService';
 export { ReviewProcessorService } from './ReviewProcessor';
 export { MessageFormatter } from './MessageFormatter';
+export { TelegramApiWrapper } from './TelegramApiWrapper';
+export type { 
+  TelegramMessage, 
+  TelegramEditMessage, 
+  RetryConfig, 
+  TelegramApiError 
+} from './TelegramApiWrapper';

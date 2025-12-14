@@ -111,10 +111,19 @@ describe('MessageFormatter', () => {
           }
           
           // Test that translation or fallback is included
+          // Should always contain spoiler section
+          expect(message).toContain('||');
+          
           if (word.exampleRu) {
-            expect(message).toContain('||');
+            // Should contain the actual translation (possibly escaped)
+            const escapedTranslation = formatter.escapeMarkdownV2(word.exampleRu);
+            expect(message).toContain(escapedTranslation);
+          } else if (word.exampleEn) {
+            // Should contain fallback message for missing translation
+            expect(message).toContain('Translation not available');
           } else {
-            expect(message).toContain('||Перевод недоступен||');
+            // Should contain encouraging message when both are missing
+            expect(message).toContain('Think about what this word means');
           }
           
           // Test that level is included if available

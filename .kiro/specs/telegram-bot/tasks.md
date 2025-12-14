@@ -19,18 +19,18 @@
   - **Property 1: Account Linking Validation**
   - **Validates: Requirements 1.2, 1.3**
 
-- [ ] 2. Implement domain interfaces and types
+- [x] 2. Implement domain interfaces and types
   - Create core TypeScript interfaces (DueReviewSelector, ReviewDeliveryService, ReviewProcessor, AccountLinker)
   - Define domain types (ScheduledReview, LinkCodeValidation, UserStats, Difficulty, DeliveryWindow)
   - Implement MessageFormatter interface with MarkdownV2 escaping
   - Create error types for different failure scenarios
   - _Requirements: 9.1, 9.2, 9.3, 9.4_
 
-- [ ] 2.1 Write property test for MarkdownV2 escaping
+- [x] 2.1 Write property test for MarkdownV2 escaping
   - **Property 5: Review Message Format Consistency**
   - **Validates: Requirements 2.2, 2.3**
 
-- [ ] 2.2 Write property test for SRS interval calculations
+- [x] 2.2 Write property test for SRS interval calculations
   - **Property 8: SRS Interval Calculation**
   - **Validates: Requirements 3.2**
 

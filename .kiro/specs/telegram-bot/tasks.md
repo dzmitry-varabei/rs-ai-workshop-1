@@ -54,7 +54,7 @@
   - **Property 9: Atomic Schedule Updates**
   - **Validates: Requirements 3.3**
 
-- [ ] 4. Implement core bot services
+- [x] 4. Implement core bot services
   - Create AccountLinker service with validation and linking logic
   - Create DueReviewSelector service with timezone and window filtering
   - Create ReviewDeliveryService with atomic claiming and sending
@@ -62,19 +62,19 @@
   - Implement proper error handling and logging for all services
   - _Requirements: 1.2, 1.3, 1.4, 1.5, 2.1, 2.4, 3.1, 3.2, 3.3, 4.1, 4.2_
 
-- [ ] 4.1 Write property test for timezone conversions
+- [x] 4.1 Write property test for timezone conversions
   - **Property 13: Timezone Conversion Accuracy**
   - **Validates: Requirements 4.1**
 
-- [ ] 4.2 Write property test for time window enforcement
+- [x] 4.2 Write property test for time window enforcement
   - **Property 6: Time Window Enforcement**
   - **Validates: Requirements 2.4, 4.2**
 
-- [ ] 4.3 Write property test for daily limit enforcement
+- [x] 4.3 Write property test for daily limit enforcement
   - **Property 14: Daily Limit Enforcement**
   - **Validates: Requirements 4.3**
 
-- [ ] 5. Implement message formatting and Telegram integration
+- [x] 5. Implement message formatting and Telegram integration
   - Create MessageFormatter with MarkdownV2 escaping and review formatting
   - Handle missing data gracefully (no example, no translation, no pronunciation)
   - Create inline keyboard builders for difficulty selection
@@ -82,15 +82,15 @@
   - Add exponential backoff for rate limiting scenarios
   - _Requirements: 2.1, 2.2, 2.3, 2.5, 7.3, 10.5_
 
-- [ ] 5.1 Write property test for missing data handling
+- [x] 5.1 Write property test for missing data handling
   - **Property 7: Pronunciation Inclusion**
   - **Validates: Requirements 2.5**
 
-- [ ] 5.2 Write property test for exponential backoff
+- [x] 5.2 Write property test for exponential backoff
   - **Property 25: Exponential Backoff Retry**
   - **Validates: Requirements 10.5**
 
-- [ ] 6. Checkpoint - Ensure all tests pass, ask the user if questions arise
+- [x] 6. Checkpoint - Ensure all tests pass, ask the user if questions arise
 
 - [ ] 7. Implement command handlers
   - Create /start command handler with conditional welcome messages

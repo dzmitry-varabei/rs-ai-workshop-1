@@ -218,14 +218,20 @@ describe('Command State Filtering', () => {
           vi.clearAllMocks();
           
           // Setup mock context with potentially invalid chat
+          // Note: Telegram API always provides numeric chat IDs, so we need to handle the conversion properly
+          let chatIdNumber: number | undefined;
+          if (hasChat && chatId && !isNaN(parseInt(chatId))) {
+            chatIdNumber = parseInt(chatId);
+          }
+          
           const mockCtx = {
-            chat: hasChat && chatId ? { id: parseInt(chatId) } : undefined,
+            chat: chatIdNumber !== undefined ? { id: chatIdNumber } : undefined,
           } as any;
 
           // Test command filtering
           const allowed = await commandHandlers.filterCommand(command, mockCtx);
 
-          const isValidChatId = hasChat && chatId && chatId.trim() !== '' && !isNaN(parseInt(chatId));
+          const isValidChatId = chatIdNumber !== undefined;
           
           if (!isValidChatId) {
             // Should reject commands for invalid chat IDs
@@ -234,7 +240,9 @@ describe('Command State Filtering', () => {
             expect(mockUserProfileRepository.getProfileByChatId).not.toHaveBeenCalled();
           } else {
             // Should process normally for valid chat IDs
-            expect(mockUserProfileRepository.getProfileByChatId).toHaveBeenCalledWith(chatId);
+            // Note: Telegram API provides numeric IDs, which become strings when converted
+            const expectedChatId = chatIdNumber!.toString();
+            expect(mockUserProfileRepository.getProfileByChatId).toHaveBeenCalledWith(expectedChatId);
           }
         }
       ),

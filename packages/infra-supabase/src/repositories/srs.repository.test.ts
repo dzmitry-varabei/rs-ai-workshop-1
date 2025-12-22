@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SupabaseSrsRepository } from './srs.repository.js';
 import type { UserId, WordId, SrsDifficulty } from '@english-learning/domain';

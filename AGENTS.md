@@ -24,11 +24,11 @@ Always prefer reading existing docs and code over guessing.
 - `apps/web`
   - Vocabulary quiz UI (cards, swipe / keyboard / touch)
   - Shows words from the shared dictionary
-  - Updates user word status (`known` / `unknown`) in the database
+  - Updates user word status (`known` / `unknown`) via Database Service API
   - Exports results to PDF
 - `apps/telegram-bot`
   - Telegram bot that:
-    - reads unknown words for a user
+    - reads unknown words for a user via Database Service API
     - schedules reviews using spaced repetition
     - sends messages with examples and translations (with Telegram spoilers)
     - uses inline buttons to collect difficulty
@@ -37,12 +37,25 @@ Always prefer reading existing docs and code over guessing.
     - word model, pronunciations, quiz stats, SRS scheduler, etc
 - `packages/infra-supabase`
   - Implementations of domain repositories using Supabase (Postgres)
+  - Used by Database Service (not directly by apps)
+- `packages/infra-memory`
+  - In-memory implementations of domain repositories for testing and development
+  - Used by Database Service when STORAGE_BACKEND=memory
+- `packages/database-service`
+  - HTTP API service that provides controlled database access
+  - Encapsulates all database operations behind REST endpoints
+  - Owned by Database Team
+- `packages/database-client`
+  - HTTP client library for Database Service API
+  - Used by apps instead of direct repository access
 - `docs/`
   - `overview.md` — high-level architecture and use cases
   - `web-app.md` — quiz behaviour and UI details
   - `telegram-bot.md` — bot flows and message formats
   - `spaced-repetition.md` — SRS algorithm
   - `data-model.md` — database schema and relations
+  - `database-service-architecture.md` — new architecture documentation
+  - `migration-to-database-service.md` — migration guide
 - `supabase/`
   - Database migrations and seed data
 
@@ -66,12 +79,15 @@ From the repo root:
 
 - `pnpm dev:web` — start web app dev server
 - `pnpm dev:bot` — start Telegram bot in dev mode
+- `pnpm dev:db` — start Database Service (required for apps)
 - `pnpm lint` — lint all packages
 - `pnpm typecheck` — run TypeScript checks
 - `pnpm test` — run unit tests
 - `pnpm check` — run `lint`, `typecheck`, and `test`
 
 Always run `pnpm check` before finishing your work.
+
+**Note:** Apps now require the Database Service to be running. Start it with `pnpm dev:db` before starting web or bot apps.
 
 ---
 
@@ -98,11 +114,14 @@ When you get an issue:
    - If the issue is too big, suggest splitting it
 
 4. **Keep changes localized**
-   - Prefer changing `packages/domain` and `packages/infra-supabase` instead of duplicating logic in apps
+   - Prefer changing `packages/domain` and `packages/database-service` instead of duplicating logic in apps
+   - Apps should use `packages/database-client` to communicate with Database Service
    - For database changes:
      - add/modify migration in `supabase/migrations`
      - update `docs/data-model.md`
      - update mapping code in `packages/infra-supabase`
+     - update API endpoints in `packages/database-service`
+     - update client methods in `packages/database-client`
 
 5. **Explain non-obvious decisions**
    - Use comments like `// NOTE: why this approach is chosen`

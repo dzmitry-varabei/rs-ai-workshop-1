@@ -1,10 +1,10 @@
 import jsPDF from 'jspdf';
-import type { Word, UserWordStats } from '@english-learning/domain';
+import type { WordResponse, UserStatsResponse } from '@english-learning/database-client';
 
 interface ExportData {
-  knownWords: Word[];
-  unknownWords: Word[];
-  stats: UserWordStats;
+  knownWords: WordResponse[];
+  unknownWords: WordResponse[];
+  stats: UserStatsResponse;
   exportDate: Date;
 }
 
@@ -58,7 +58,7 @@ export async function exportToPDF(data: ExportData): Promise<void> {
         doc.addPage();
         yPos = margin;
       }
-      doc.text(`• ${word.text}${word.level ? ` (${word.level})` : ''}`, margin + 5, yPos);
+      doc.text(`• ${word.textEn}${word.level ? ` (${word.level})` : ''}`, margin + 5, yPos);
       yPos += lineHeight;
     }
     yPos += lineHeight;
@@ -81,7 +81,7 @@ export async function exportToPDF(data: ExportData): Promise<void> {
         doc.addPage();
         yPos = margin;
       }
-      doc.text(`• ${word.text}${word.level ? ` (${word.level})` : ''}`, margin + 5, yPos);
+      doc.text(`• ${word.textEn}${word.level ? ` (${word.level})` : ''}`, margin + 5, yPos);
       yPos += lineHeight;
     }
   }

@@ -1,8 +1,8 @@
-import type { UserWordStats } from '@english-learning/domain';
+import type { UserStatsResponse } from '@english-learning/database-client';
 import './StatsPanel.css';
 
 interface StatsPanelProps {
-  stats: UserWordStats;
+  stats: UserStatsResponse;
   currentProgress: number;
   totalInBatch: number;
 }

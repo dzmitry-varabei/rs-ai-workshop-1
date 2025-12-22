@@ -19,6 +19,9 @@
   "references": [
     { "path": "./packages/domain" },
     { "path": "./packages/infra-supabase" },
+    { "path": "./packages/infra-memory" },
+    { "path": "./packages/database-service" },
+    { "path": "./packages/database-client" },
     { "path": "./apps/web" },
     { "path": "./apps/telegram-bot" }
   ]

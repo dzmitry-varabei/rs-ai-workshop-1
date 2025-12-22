@@ -40,7 +40,11 @@ export async function srsRoutes(
       },
     },
   }, async (request) => {
-    const reviewData = request.body as { userId: string; wordId: string; difficulty: string };
+    const reviewData = request.body as { 
+      userId: string; 
+      wordId: string; 
+      difficulty: 'easy' | 'medium' | 'hard' | 'very_hard' 
+    };
     await srsService.recordReview(reviewData);
     return { success: true };
   });

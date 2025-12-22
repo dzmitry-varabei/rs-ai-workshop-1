@@ -1,19 +1,20 @@
-import { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { useState, useEffect, useCallback } from 'react';
+import { AuthProvider } from './contexts/AuthProvider';
+import { useAuth } from './hooks/useAuth';
 import { WordCard } from './components/WordCard';
 import { StatsPanel } from './components/StatsPanel';
 import { ResetModal } from './components/ResetModal';
-import { createRepositories } from './lib/repositories';
+import { createDatabaseClient } from './lib/database';
 import { exportToPDF } from './lib/pdfExport';
-import type { Word, WordId, UserWordStats } from '@english-learning/domain';
+import type { WordResponse, UserStatsResponse } from '@english-learning/database-client';
 import './App.css';
 
 function AppContent() {
-  const { user, loading, signInAnonymously, userId } = useAuth();
-  const [words, setWords] = useState<Word[]>([]);
+  const { userId, loading, signInAnonymously } = useAuth();
+  const [words, setWords] = useState<WordResponse[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loadingWords, setLoadingWords] = useState(false);
-  const [stats, setStats] = useState<UserWordStats>({
+  const [stats, setStats] = useState<UserStatsResponse>({
     totalSeen: 0,
     known: 0,
     unknown: 0,
@@ -23,67 +24,57 @@ function AppContent() {
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetting, setResetting] = useState(false);
 
-  useEffect(() => {
-    if (userId) {
-      loadWords();
-      loadStats();
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    // Refresh stats after each word action
-    if (userId && words.length > 0) {
-      loadStats();
-    }
-  }, [currentIndex, userId]);
-
-  const loadWords = async () => {
+  const loadWords = useCallback(async () => {
     if (!userId) return;
     setLoadingWords(true);
     try {
-      const repos = createRepositories();
-      // Load more words than needed to account for already seen words
-      const batch = await repos.wordRepository.getRandomBatch(userId, 50);
+      const dbClient = createDatabaseClient();
+      // Load words from Database Service
+      const batch = await dbClient.getRandomWords(userId, 20);
       console.debug('loadWords: batch size', batch.length);
       
-      // Filter out words that user has already seen (resume functionality)
-      const unseenWords: Word[] = [];
-      for (const word of batch) {
-        const status = await repos.userWordStateRepository.getStatus(userId, word.id);
-        if (!status) {
-          unseenWords.push(word);
-          if (unseenWords.length >= 20) break; // Get 20 unseen words
-        }
-      }
-      console.debug('loadWords: unseen size', unseenWords.length);
-      setWords(unseenWords.length > 0 ? unseenWords : batch.slice(0, 20));
+      setWords(batch);
       setCurrentIndex(0);
     } catch (error) {
       console.error('Failed to load words:', error);
     } finally {
       setLoadingWords(false);
     }
-  };
+  }, [userId]);
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     if (!userId) return;
     try {
-      const repos = createRepositories();
-      const userStats = await repos.userWordStateRepository.getStats(userId);
+      const dbClient = createDatabaseClient();
+      const userStats = await dbClient.getUserStats(userId);
       setStats(userStats);
     } catch (error) {
       console.error('Failed to load stats:', error);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      loadWords();
+      loadStats();
+    }
+  }, [userId, loadWords, loadStats]);
+
+  useEffect(() => {
+    // Refresh stats after each word action
+    if (userId && words.length > 0) {
+      loadStats();
+    }
+  }, [currentIndex, userId, words.length, loadStats]);
 
   const handleSwipeLeft = async () => {
     if (!userId || !words[currentIndex]) return;
     const wordId = words[currentIndex].id;
     try {
-      const repos = createRepositories();
-      await repos.userWordStateRepository.markUnknown(userId, wordId);
-      // Optionally create SRS item for unknown word
-      await repos.srsRepository.createOrGet(userId, wordId, new Date());
+      const dbClient = createDatabaseClient();
+      await dbClient.markWordUnknown(userId, wordId);
+      // Create SRS item for unknown word
+      await dbClient.createSrsItem(userId, wordId);
       await loadStats(); // Refresh stats after marking
       nextWord();
     } catch (error) {
@@ -95,8 +86,8 @@ function AppContent() {
     if (!userId || !words[currentIndex]) return;
     const wordId = words[currentIndex].id;
     try {
-      const repos = createRepositories();
-      await repos.userWordStateRepository.markKnown(userId, wordId);
+      const dbClient = createDatabaseClient();
+      await dbClient.markWordKnown(userId, wordId);
       await loadStats(); // Refresh stats after marking
       nextWord();
     } catch (error) {
@@ -117,8 +108,8 @@ function AppContent() {
     if (!userId) return;
     setResetting(true);
     try {
-      const repos = createRepositories();
-      await repos.userWordStateRepository.resetProgress(userId);
+      const dbClient = createDatabaseClient();
+      await dbClient.resetUserProgress(userId);
       // Reset local state
       setWords([]);
       setCurrentIndex(0);
@@ -136,27 +127,17 @@ function AppContent() {
   const handleExportPDF = async () => {
     if (!userId) return;
     try {
-      const repos = createRepositories();
+      const dbClient = createDatabaseClient();
       
-      // Get word IDs by status
-      const knownWordIds = await repos.userWordStateRepository.getWordIdsByStatus(userId, 'known');
-      const unknownWordIds = await repos.userWordStateRepository.getWordIdsByStatus(userId, 'unknown');
+      // For now, we'll export current stats and words
+      // In a full implementation, we'd need additional API endpoints
+      // to get words by status
+      const freshStats = await dbClient.getUserStats(userId);
       
-      // Get full word data
-      const knownWords = knownWordIds.length > 0 
-        ? await repos.wordRepository.getByIds(knownWordIds)
-        : [];
-      const unknownWords = unknownWordIds.length > 0
-        ? await repos.wordRepository.getByIds(unknownWordIds)
-        : [];
-      
-      // Get fresh stats
-      const freshStats = await repos.userWordStateRepository.getStats(userId);
-      
-      // Export to PDF
+      // Export to PDF with available data
       await exportToPDF({
-        knownWords,
-        unknownWords,
+        knownWords: [], // TODO: Add API endpoint to get words by status
+        unknownWords: [], // TODO: Add API endpoint to get words by status
         stats: freshStats,
         exportDate: new Date(),
       });
@@ -174,14 +155,14 @@ function AppContent() {
     );
   }
 
-  if (!user) {
+  if (!userId) {
     return (
       <div className="app-container">
         <div className="auth-screen">
           <h1>English Learning Quiz</h1>
           <p>Welcome! Please sign in to start the quiz.</p>
           <button onClick={signInAnonymously} className="sign-in-button">
-            Sign In Anonymously
+            Start Quiz
           </button>
         </div>
       </div>

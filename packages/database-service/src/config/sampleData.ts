@@ -9,7 +9,7 @@ import type { Word } from '@english-learning/domain';
 export function createSampleWords(): Word[] {
   return [
     {
-      id: 'word-1' as any,
+      id: '550e8400-e29b-41d4-a716-446655440001' as any,
       text: 'hello',
       level: 'A1',
       exampleEn: 'Hello, how are you?',
@@ -24,7 +24,7 @@ export function createSampleWords(): Word[] {
       ],
     },
     {
-      id: 'word-2' as any,
+      id: '550e8400-e29b-41d4-a716-446655440002' as any,
       text: 'goodbye',
       level: 'A1',
       exampleEn: 'Goodbye, see you later!',
@@ -38,7 +38,7 @@ export function createSampleWords(): Word[] {
       ],
     },
     {
-      id: 'word-3' as any,
+      id: '550e8400-e29b-41d4-a716-446655440003' as any,
       text: 'beautiful',
       level: 'B1',
       exampleEn: 'The sunset is beautiful.',
@@ -52,7 +52,7 @@ export function createSampleWords(): Word[] {
       ],
     },
     {
-      id: 'word-4' as any,
+      id: '550e8400-e29b-41d4-a716-446655440004' as any,
       text: 'understand',
       level: 'A2',
       exampleEn: 'Do you understand the question?',
@@ -66,7 +66,7 @@ export function createSampleWords(): Word[] {
       ],
     },
     {
-      id: 'word-5' as any,
+      id: '550e8400-e29b-41d4-a716-446655440005' as any,
       text: 'important',
       level: 'B1',
       exampleEn: 'This is very important information.',
@@ -80,7 +80,7 @@ export function createSampleWords(): Word[] {
       ],
     },
     {
-      id: 'word-6' as any,
+      id: '550e8400-e29b-41d4-a716-446655440006' as any,
       text: 'computer',
       level: 'A2',
       exampleEn: 'I work on my computer every day.',
@@ -94,7 +94,7 @@ export function createSampleWords(): Word[] {
       ],
     },
     {
-      id: 'word-7' as any,
+      id: '550e8400-e29b-41d4-a716-446655440007' as any,
       text: 'learning',
       level: 'A2',
       exampleEn: 'Learning English is fun!',
@@ -108,7 +108,7 @@ export function createSampleWords(): Word[] {
       ],
     },
     {
-      id: 'word-8' as any,
+      id: '550e8400-e29b-41d4-a716-446655440008' as any,
       text: 'experience',
       level: 'B2',
       exampleEn: 'She has a lot of experience in teaching.',
@@ -122,7 +122,7 @@ export function createSampleWords(): Word[] {
       ],
     },
     {
-      id: 'word-9' as any,
+      id: '550e8400-e29b-41d4-a716-446655440009' as any,
       text: 'development',
       level: 'B2',
       exampleEn: 'Software development requires patience.',
@@ -136,7 +136,7 @@ export function createSampleWords(): Word[] {
       ],
     },
     {
-      id: 'word-10' as any,
+      id: '550e8400-e29b-41d4-a716-446655440010' as any,
       text: 'knowledge',
       level: 'B1',
       exampleEn: 'Knowledge is power.',

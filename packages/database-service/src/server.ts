@@ -5,7 +5,9 @@
  * Supports multiple storage backends: Supabase, In-Memory.
  */
 
+import 'dotenv/config';
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import { createRepositories, getRepositoryConfigFromEnv } from './config/repositories.js';
 
 import { WordService } from './services/WordService.js';
@@ -24,6 +26,12 @@ async function createServer() {
     logger: {
       level: process.env.LOG_LEVEL || 'info',
     },
+  });
+
+  // Enable CORS for web app
+  await fastify.register(cors, {
+    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    credentials: true,
   });
 
   // Initialize repositories based on configuration

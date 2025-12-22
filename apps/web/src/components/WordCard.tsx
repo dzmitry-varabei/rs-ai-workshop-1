@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import type { Word } from '@english-learning/domain';
+import type { WordResponse } from '@english-learning/database-client';
 import './WordCard.css';
 
 interface WordCardProps {
-  word: Word;
+  word: WordResponse;
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
 }
@@ -111,7 +111,7 @@ export function WordCard({ word, onSwipeLeft, onSwipeRight }: WordCardProps) {
       onTouchEnd={handleTouchEnd}
     >
       <div className="word-card-content">
-        <h2 className="word-text">{word.text}</h2>
+        <h2 className="word-text">{word.textEn}</h2>
         {word.exampleEn && (
           <p className="word-example">{word.exampleEn}</p>
         )}

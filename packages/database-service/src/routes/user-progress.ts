@@ -1,0 +1,82 @@
+/**
+ * User Progress API Routes
+ */
+
+import type { FastifyInstance } from 'fastify';
+import { 
+  MarkWordRequestSchema, 
+  GetUserStatsRequestSchema 
+} from '../types/api.js';
+import type { UserProgressService } from '../services/UserProgressService.js';
+
+export async function userProgressRoutes(
+  fastify: FastifyInstance,
+  { userProgressService }: { userProgressService: UserProgressService }
+) {
+  // POST /api/user-progress/mark-known
+  fastify.post('/mark-known', {
+    schema: {
+      body: MarkWordRequestSchema,
+    },
+  }, async (request) => {
+    const { userId, wordId } = MarkWordRequestSchema.parse(request.body);
+    await userProgressService.markWordKnown(userId, wordId);
+    return { success: true };
+  });
+
+  // POST /api/user-progress/mark-unknown
+  fastify.post('/mark-unknown', {
+    schema: {
+      body: MarkWordRequestSchema,
+    },
+  }, async (request) => {
+    const { userId, wordId } = MarkWordRequestSchema.parse(request.body);
+    await userProgressService.markWordUnknown(userId, wordId);
+    return { success: true };
+  });
+
+  // GET /api/user-progress/stats
+  fastify.get('/stats', {
+    schema: {
+      querystring: GetUserStatsRequestSchema,
+    },
+  }, async (request) => {
+    const { userId } = GetUserStatsRequestSchema.parse(request.query);
+    return userProgressService.getUserStats(userId);
+  });
+
+  // GET /api/user-progress/word-status
+  fastify.get('/word-status', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string', format: 'uuid' },
+          wordId: { type: 'string', format: 'uuid' },
+        },
+        required: ['userId', 'wordId'],
+      },
+    },
+  }, async (request) => {
+    const { userId, wordId } = request.query as { userId: string; wordId: string };
+    const status = await userProgressService.getWordStatus(userId, wordId);
+    return { status };
+  });
+
+  // POST /api/user-progress/reset
+  fastify.post('/reset', {
+    schema: {
+      body: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string', format: 'uuid' },
+        },
+        required: ['userId'],
+      },
+    },
+  }, async (request) => {
+    const { userId } = request.body as { userId: string };
+    await userProgressService.resetProgress(userId);
+    return { success: true };
+  });
+}

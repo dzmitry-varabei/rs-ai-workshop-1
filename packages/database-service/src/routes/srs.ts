@@ -3,11 +3,6 @@
  */
 
 import type { FastifyInstance } from 'fastify';
-import { 
-  GetDueWordsRequestSchema,
-  RecordReviewRequestSchema,
-  GetUserStatsRequestSchema 
-} from '../types/api.js';
 import type { SrsService } from '../services/SrsService.js';
 
 export async function srsRoutes(
@@ -17,20 +12,35 @@ export async function srsRoutes(
   // GET /api/srs/due-words
   fastify.get('/due-words', {
     schema: {
-      querystring: GetDueWordsRequestSchema,
+      querystring: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string', format: 'uuid' },
+          limit: { type: 'number', minimum: 1, maximum: 50, default: 10 },
+        },
+        required: ['userId'],
+      },
     },
   }, async (request) => {
-    const { userId, limit } = GetDueWordsRequestSchema.parse(request.query);
+    const { userId, limit = 10 } = request.query as { userId: string; limit?: number };
     return srsService.getDueWords(userId, limit);
   });
 
   // POST /api/srs/record-review
   fastify.post('/record-review', {
     schema: {
-      body: RecordReviewRequestSchema,
+      body: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string', format: 'uuid' },
+          wordId: { type: 'string', format: 'uuid' },
+          difficulty: { type: 'string', enum: ['easy', 'medium', 'hard', 'very_hard'] },
+        },
+        required: ['userId', 'wordId', 'difficulty'],
+      },
     },
   }, async (request) => {
-    const reviewData = RecordReviewRequestSchema.parse(request.body);
+    const reviewData = request.body as { userId: string; wordId: string; difficulty: string };
     await srsService.recordReview(reviewData);
     return { success: true };
   });
@@ -38,10 +48,16 @@ export async function srsRoutes(
   // GET /api/srs/stats
   fastify.get('/stats', {
     schema: {
-      querystring: GetUserStatsRequestSchema,
+      querystring: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string', format: 'uuid' },
+        },
+        required: ['userId'],
+      },
     },
   }, async (request) => {
-    const { userId } = GetUserStatsRequestSchema.parse(request.query);
+    const { userId } = request.query as { userId: string };
     return srsService.getSrsStats(userId);
   });
 

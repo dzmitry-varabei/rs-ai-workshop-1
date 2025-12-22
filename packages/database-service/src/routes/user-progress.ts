@@ -3,10 +3,6 @@
  */
 
 import type { FastifyInstance } from 'fastify';
-import { 
-  MarkWordRequestSchema, 
-  GetUserStatsRequestSchema 
-} from '../types/api.js';
 import type { UserProgressService } from '../services/UserProgressService.js';
 
 export async function userProgressRoutes(
@@ -16,10 +12,17 @@ export async function userProgressRoutes(
   // POST /api/user-progress/mark-known
   fastify.post('/mark-known', {
     schema: {
-      body: MarkWordRequestSchema,
+      body: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string', format: 'uuid' },
+          wordId: { type: 'string', format: 'uuid' },
+        },
+        required: ['userId', 'wordId'],
+      },
     },
   }, async (request) => {
-    const { userId, wordId } = MarkWordRequestSchema.parse(request.body);
+    const { userId, wordId } = request.body as { userId: string; wordId: string };
     await userProgressService.markWordKnown(userId, wordId);
     return { success: true };
   });
@@ -27,10 +30,17 @@ export async function userProgressRoutes(
   // POST /api/user-progress/mark-unknown
   fastify.post('/mark-unknown', {
     schema: {
-      body: MarkWordRequestSchema,
+      body: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string', format: 'uuid' },
+          wordId: { type: 'string', format: 'uuid' },
+        },
+        required: ['userId', 'wordId'],
+      },
     },
   }, async (request) => {
-    const { userId, wordId } = MarkWordRequestSchema.parse(request.body);
+    const { userId, wordId } = request.body as { userId: string; wordId: string };
     await userProgressService.markWordUnknown(userId, wordId);
     return { success: true };
   });
@@ -38,10 +48,16 @@ export async function userProgressRoutes(
   // GET /api/user-progress/stats
   fastify.get('/stats', {
     schema: {
-      querystring: GetUserStatsRequestSchema,
+      querystring: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string', format: 'uuid' },
+        },
+        required: ['userId'],
+      },
     },
   }, async (request) => {
-    const { userId } = GetUserStatsRequestSchema.parse(request.query);
+    const { userId } = request.query as { userId: string };
     return userProgressService.getUserStats(userId);
   });
 

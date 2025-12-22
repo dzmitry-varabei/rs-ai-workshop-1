@@ -1,7 +1,7 @@
 {
-  "name": "@english-learning/database-service",
+  "name": "@english-learning/infra-memory",
   "version": "0.1.0",
-  "description": "Database service layer with HTTP API for English Learning System",
+  "description": "In-memory implementations of domain repositories for testing and development",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -10,10 +10,9 @@
       "types": "./src/index.ts"
     }
   },
+  "sideEffects": false,
   "scripts": {
-    "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -21,15 +20,9 @@
     "check": "pnpm typecheck && pnpm test"
   },
   "dependencies": {
-    "@english-learning/domain": "workspace:*",
-    "@english-learning/infra-supabase": "workspace:*",
-    "@english-learning/infra-memory": "workspace:*",
-    "fastify": "^4.24.0",
-    "zod": "^3.22.0"
+    "@english-learning/domain": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "tsx": "^4.0.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0"
   }

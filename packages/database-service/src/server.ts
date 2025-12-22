@@ -2,15 +2,11 @@
  * Database Service HTTP Server
  * 
  * Fastify server that exposes database operations via REST API.
+ * Supports multiple storage backends: Supabase, In-Memory.
  */
 
 import Fastify from 'fastify';
-import { createSupabaseClient } from '@english-learning/infra-supabase';
-import { 
-  SupabaseWordRepository,
-  SupabaseUserWordStateRepository,
-  SupabaseSrsRepository 
-} from '@english-learning/infra-supabase';
+import { createRepositories, getRepositoryConfigFromEnv } from './config/repositories.js';
 
 import { WordService } from './services/WordService.js';
 import { UserProgressService } from './services/UserProgressService.js';
@@ -30,29 +26,24 @@ async function createServer() {
     },
   });
 
-  // Initialize Supabase client
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_ANON_KEY;
+  // Initialize repositories based on configuration
+  const repositoryConfig = getRepositoryConfigFromEnv();
+  const repositories = createRepositories(repositoryConfig);
   
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Missing Supabase environment variables');
-  }
-  
-  const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
-
-  // Initialize repositories
-  const wordRepository = new SupabaseWordRepository(supabase);
-  const userWordStateRepository = new SupabaseUserWordStateRepository(supabase);
-  const srsRepository = new SupabaseSrsRepository(supabase);
+  fastify.log.info(`Using storage backend: ${repositoryConfig.backend}`);
 
   // Initialize services
-  const wordService = new WordService(wordRepository);
-  const userProgressService = new UserProgressService(userWordStateRepository);
-  const srsService = new SrsService(srsRepository, wordRepository);
+  const wordService = new WordService(repositories.wordRepository);
+  const userProgressService = new UserProgressService(repositories.userWordStateRepository);
+  const srsService = new SrsService(repositories.srsRepository, repositories.wordRepository);
 
   // Health check
   fastify.get('/health', async () => {
-    return { status: 'ok', timestamp: new Date().toISOString() };
+    return { 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      backend: repositoryConfig.backend,
+    };
   });
 
   // Register API routes

@@ -13,7 +13,14 @@ export async function wordsRoutes(
   // GET /api/words/random
   fastify.get('/random', {
     schema: {
-      querystring: GetRandomWordsRequestSchema,
+      querystring: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string', format: 'uuid' },
+          limit: { type: 'number', minimum: 1, maximum: 100, default: 10 },
+        },
+        required: ['userId'],
+      },
       response: {
         200: {
           type: 'array',
@@ -43,7 +50,7 @@ export async function wordsRoutes(
       },
     },
   }, async (request) => {
-    const { userId, limit } = GetRandomWordsRequestSchema.parse(request.query);
+    const { userId, limit = 10 } = request.query as { userId: string; limit?: number };
     return wordService.getRandomWords(userId, limit);
   });
 

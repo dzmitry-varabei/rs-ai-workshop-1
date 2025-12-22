@@ -6,7 +6,7 @@ import { StatsPanel } from './components/StatsPanel';
 import { ResetModal } from './components/ResetModal';
 import { createDatabaseClient } from './lib/database';
 import { exportToPDF } from './lib/pdfExport';
-import type { WordResponse, UserStatsResponse } from '@english-learning/database-client';
+import type { WordResponse, UserStatsResponse } from '@english-learning/data-layer-client';
 import './App.css';
 
 function AppContent() {

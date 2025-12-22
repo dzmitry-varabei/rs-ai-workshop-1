@@ -1,4 +1,4 @@
-import { DatabaseClient } from '@english-learning/database-client';
+import { DatabaseClient } from '@english-learning/data-layer-client';
 
 /**
  * Create Database Service client for the web app

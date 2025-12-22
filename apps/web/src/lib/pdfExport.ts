@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import type { WordResponse, UserStatsResponse } from '@english-learning/database-client';
+import type { WordResponse, UserStatsResponse } from '@english-learning/data-layer-client';
 
 interface ExportData {
   knownWords: WordResponse[];

@@ -204,6 +204,58 @@ export class SupabaseSrsRepository implements SrsRepository {
     };
   }
 
+  // TODO: Implement these methods for Supabase
+  async getGlobalDueReviews(now: Date, limit: number, offset: number): Promise<Array<{
+    userId: UserId;
+    wordId: WordId;
+    nextReviewAt: Date;
+    intervalMinutes: number;
+    reviewCount: number;
+    user: {
+      telegramChatId?: string;
+      timezone: string;
+      preferredWindowStart: string;
+      preferredWindowEnd: string;
+    };
+  }>> {
+    // TODO: Implement with proper join to user profiles
+    return [];
+  }
+
+  async claimReviews(limit: number): Promise<Array<{
+    userId: UserId;
+    wordId: WordId;
+  }>> {
+    // TODO: Implement atomic claiming
+    return [];
+  }
+
+  async markSent(userId: UserId, wordId: WordId, messageId: string, sentAt: Date): Promise<void> {
+    // TODO: Implement message tracking
+  }
+
+  async resetToDue(userId: UserId, wordId: WordId): Promise<void> {
+    // TODO: Implement reset to due state
+  }
+
+  async processTimeouts(timeoutMinutes: number = 1440): Promise<number> {
+    // TODO: Implement timeout processing
+    return 0;
+  }
+
+  async getProcessingStats(): Promise<{
+    awaitingResponse: number;
+    overdue: number;
+    processedToday: number;
+  }> {
+    // TODO: Implement processing stats
+    return {
+      awaitingResponse: 0,
+      overdue: 0,
+      processedToday: 0,
+    };
+  }
+
   /**
    * Map database row to domain SrsItem
    */

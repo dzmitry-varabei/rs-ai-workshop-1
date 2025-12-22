@@ -14,9 +14,8 @@
     "lint": "eslint . --ext ts --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@english-learning/data-layer-client": "workspace:*",
     "@english-learning/data-layer-domain": "workspace:*",
-    "@english-learning/data-layer-implementations-supabase": "workspace:*",
-    "@supabase/supabase-js": "^2.39.0",
     "telegraf": "^4.15.6",
     "dotenv": "^16.4.5",
     "date-fns": "^3.0.6",

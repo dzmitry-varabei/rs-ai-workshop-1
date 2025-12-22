@@ -5,7 +5,7 @@
  * with no dependencies on infrastructure (Supabase, etc.)
  */
 
-export type { UserId, WordId, WordStatus, SrsDifficulty } from './types.js';
+export type { UserId, WordId, WordStatus, SrsDifficulty, UserProfile } from './types.js';
 export type { Word, Pronunciation } from './word.js';
 export {
   scheduleNextReview,
@@ -19,5 +19,6 @@ export type {
   UserWordStats,
   SrsRepository,
   SrsItem,
+  UserProfileRepository,
 } from './repositories.js';
 

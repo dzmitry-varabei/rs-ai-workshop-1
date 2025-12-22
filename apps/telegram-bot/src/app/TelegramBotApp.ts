@@ -1,5 +1,6 @@
 import { Telegraf } from 'telegraf';
 import { createClient } from '@supabase/supabase-js';
+import { DatabaseClient } from '@english-learning/data-layer-client';
 import { createLogger } from '../utils/logger';
 import { CommandHandlers } from '../handlers/CommandHandlers';
 import { CallbackHandlers } from '../handlers/CallbackHandlers';
@@ -31,31 +32,52 @@ export class TelegramBotApp {
 
   constructor() {
     const token = process.env.TELEGRAM_BOT_TOKEN;
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const databaseServiceUrl = process.env.DATABASE_SERVICE_URL;
+
+    logger.info('Initializing TelegramBotApp...');
+    logger.info(`Database Service URL: ${databaseServiceUrl}`);
 
     if (!token) {
       throw new Error('TELEGRAM_BOT_TOKEN environment variable is required');
     }
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables are required');
+    if (!databaseServiceUrl) {
+      throw new Error('DATABASE_SERVICE_URL environment variable is required');
     }
 
-    // Initialize Supabase client
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    logger.info('Creating Database Client...');
+    // Initialize Database Client
+    const dbClient = new DatabaseClient({
+      baseUrl: databaseServiceUrl,
+    });
 
+    logger.info('Creating services...');
     // Initialize services
     const messageFormatter = new MessageFormatter();
+    
+    // Note: Account linking still uses Supabase repositories for now
+    // as these are bot-specific tables not yet migrated to Database Service
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    logger.info('Setting up Supabase for account linking...');
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables are required for account linking');
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseKey);
     const linkCodeRepo = new SupabaseLinkCodeRepository(supabase);
     const linkAttemptRepo = new SupabaseLinkAttemptRepository(supabase);
     const reviewEventRepo = new SupabaseReviewEventRepository(supabase);
     const userProfileRepo = new SupabaseUserProfileRepository(supabase);
 
+    logger.info('Creating core services...');
     const accountLinker = new AccountLinkerService(linkCodeRepo, linkAttemptRepo, userProfileRepo);
-    this.dueReviewSelector = new DueReviewSelectorService(supabase);
-    this.reviewDelivery = new ReviewDeliveryServiceImpl(supabase);
-    this.reviewProcessor = new ReviewProcessorService(supabase);
+    this.dueReviewSelector = new DueReviewSelectorService(dbClient);
+    this.reviewDelivery = new ReviewDeliveryServiceImpl(dbClient);
+    this.reviewProcessor = new ReviewProcessorService(dbClient);
 
+    logger.info('Creating handlers...');
     // Initialize handlers
     this.commandHandlers = new CommandHandlers(
       accountLinker,
@@ -71,8 +93,11 @@ export class TelegramBotApp {
       userProfileRepo
     );
 
+    logger.info('Creating Telegraf bot...');
     this.bot = new Telegraf(token);
+    logger.info('Setting up handlers...');
     this.setupHandlers();
+    logger.info('TelegramBotApp initialized successfully');
   }
 
   private setupHandlers(): void {
@@ -243,32 +268,20 @@ export class TelegramBotApp {
 
   private async processScheduledReviews(): Promise<void> {
     try {
-      // Get due reviews (limited to prevent overwhelming)
-      const dueReviews = await this.dueReviewSelector.getDueReviews(10);
+      // TODO: Implement proper scheduled review processing with Database Service
+      // For now, we'll log that the scheduler is running
+      // This needs to be enhanced once we have proper user management in Database Service
       
-      if (dueReviews.length === 0) {
-        return;
-      }
-
-      logger.info(`Processing ${dueReviews.length} due reviews`);
-
-      // Process each review
-      for (const review of dueReviews) {
-        try {
-          // For now, we'll just log the review
-          // In a full implementation, we would:
-          // 1. Get word data from WordRepository
-          // 2. Get user's Telegram chat ID
-          // 3. Send the review message
-          // 4. Mark as sent
-          
-          logger.info(`Would send review for user ${review.userId}, word ${review.wordId}`);
-        } catch (error) {
-          logger.error(`Error processing review for user ${review.userId}:`, error);
-        }
-      }
+      console.log('Scheduler running - Database Service integration in progress');
+      
+      // In the future, this would:
+      // 1. Get eligible users from Database Service
+      // 2. Get due words for each user
+      // 3. Send review messages via Telegram
+      // 4. Track delivery state
+      
     } catch (error) {
-      logger.error('Error in processScheduledReviews:', error);
+      console.error('Error in processScheduledReviews:', error);
     }
   }
 

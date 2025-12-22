@@ -5,7 +5,7 @@
  * Supports multiple storage backends: Supabase, In-Memory.
  */
 
-import type { WordRepository, UserWordStateRepository, SrsRepository } from '@english-learning/data-layer-domain';
+import type { WordRepository, UserWordStateRepository, SrsRepository, UserProfileRepository } from '@english-learning/data-layer-domain';
 import { 
   SupabaseWordRepository,
   SupabaseUserWordStateRepository,
@@ -15,7 +15,8 @@ import {
 import {
   MemoryWordRepository,
   MemoryUserWordStateRepository,
-  MemorySrsRepository
+  MemorySrsRepository,
+  MemoryUserProfileRepository
 } from '@english-learning/data-layer-implementations-memory';
 import { createSampleWords } from './sampleData.js';
 
@@ -33,6 +34,7 @@ export interface Repositories {
   wordRepository: WordRepository;
   userWordStateRepository: UserWordStateRepository;
   srsRepository: SrsRepository;
+  userProfileRepository: UserProfileRepository;
 }
 
 export function createRepositories(config: RepositoryConfig): Repositories {
@@ -55,6 +57,8 @@ function createSupabaseRepositories(supabaseConfig: { url: string; key: string }
     wordRepository: new SupabaseWordRepository(supabase),
     userWordStateRepository: new SupabaseUserWordStateRepository(supabase),
     srsRepository: new SupabaseSrsRepository(supabase),
+    // TODO: Implement SupabaseUserProfileRepository
+    userProfileRepository: new MemoryUserProfileRepository(), // Temporary fallback
   };
 }
 
@@ -66,6 +70,7 @@ function createMemoryRepositories(): Repositories {
     wordRepository: new MemoryWordRepository(sampleWords),
     userWordStateRepository: new MemoryUserWordStateRepository(),
     srsRepository: new MemorySrsRepository(),
+    userProfileRepository: new MemoryUserProfileRepository(),
   };
 }
 

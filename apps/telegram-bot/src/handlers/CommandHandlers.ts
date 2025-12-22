@@ -42,7 +42,7 @@ export class CommandHandlers {
 
       // If linked, also show current stats briefly
       if (isLinked && profile) {
-        const stats = await this.reviewEventRepository.calculateStats(profile.userId);
+        const stats = await this.reviewEventRepository.calculateStats(profile.id);
         if (stats.dueToday > 0) {
           const dueMessage = `📚 You have ${stats.dueToday} words ready for review\\!`;
           await ctx.reply(dueMessage, { parse_mode: 'MarkdownV2' });
@@ -132,9 +132,9 @@ export class CommandHandlers {
         await this.accountLinker.recordLinkAttempt(chatId, code, false);
         
         let errorMessage = 'Invalid or expired link code.';
-        if (validation.reason === 'expired') {
+        if (validation.error === 'expired') {
           errorMessage = 'This link code has expired. Please generate a new one.';
-        } else if (validation.reason === 'used') {
+        } else if (validation.error === 'used') {
           errorMessage = 'This link code has already been used.';
         }
         
@@ -188,7 +188,7 @@ export class CommandHandlers {
       const profile = await this.getLinkedProfile(ctx);
       if (!profile) return;
 
-      const stats = await this.reviewEventRepository.calculateStats(profile.userId);
+      const stats = await this.reviewEventRepository.calculateStats(profile.id);
       const statsMessage = this.messageFormatter.formatStats(stats);
       
       await ctx.reply(statsMessage, { parse_mode: 'MarkdownV2' });
@@ -214,7 +214,7 @@ export class CommandHandlers {
         return;
       }
 
-      await this.userProfileRepository.setPaused(profile.userId, true);
+      await this.userProfileRepository.setPaused(profile.id, true);
       
       const confirmationMessage = this.messageFormatter.formatPauseConfirmation();
       await ctx.reply(confirmationMessage, { parse_mode: 'MarkdownV2' });
@@ -240,10 +240,10 @@ export class CommandHandlers {
         return;
       }
 
-      await this.userProfileRepository.setPaused(profile.userId, false);
+      await this.userProfileRepository.setPaused(profile.id, false);
       
       // Check for overdue reviews
-      const dueReviews = await this.dueReviewSelector.getUserDueReviews(profile.userId);
+      const dueReviews = await this.dueReviewSelector.getUserDueReviews(profile.id);
       const overdueCount = dueReviews.length;
       
       const confirmationMessage = this.messageFormatter.formatResumeConfirmation(overdueCount);

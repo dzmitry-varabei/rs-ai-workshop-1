@@ -113,4 +113,97 @@ export class SrsService {
   async deactivateSrsItem(userId: string, wordId: string): Promise<void> {
     await this.srsRepository.deactivate(userId as any, wordId as any);
   }
+
+  async getGlobalDueReviews(limit: number = 10, offset: number = 0) {
+    const now = new Date();
+    const reviews = await this.srsRepository.getGlobalDueReviews(now, limit, offset);
+    
+    // Get word details for each review
+    const wordIds = reviews.map(review => review.wordId);
+    const words = await this.wordRepository.getByIds(wordIds);
+    const wordsMap = new Map(words.map(word => [word.id, word]));
+
+    return {
+      reviews: reviews.map(review => {
+        const word = wordsMap.get(review.wordId);
+        return {
+          userId: review.userId,
+          wordId: review.wordId,
+          nextReviewAt: review.nextReviewAt.toISOString(),
+          intervalMinutes: review.intervalMinutes,
+          reviewCount: review.reviewCount,
+          user: review.user,
+          word: word ? {
+            id: word.id,
+            textEn: word.text,
+            level: word.level,
+            exampleEn: word.exampleEn,
+            exampleRu: word.exampleRu,
+            tags: word.tags,
+            pronunciations: word.pronunciations.map(p => ({
+              locale: p.locale,
+              ipa: p.ipa,
+              audioUrl: p.audioUrl,
+            })),
+          } : null,
+        };
+      }).filter(review => review.word !== null),
+      total: reviews.length,
+      hasMore: reviews.length === limit,
+    };
+  }
+
+  async claimReviews(limit: number = 10) {
+    const claimed = await this.srsRepository.claimReviews(limit);
+    
+    // Get word details for claimed reviews
+    const wordIds = claimed.map(item => item.wordId);
+    const words = await this.wordRepository.getByIds(wordIds);
+    const wordsMap = new Map(words.map(word => [word.id, word]));
+
+    return {
+      claimedReviews: claimed.map(item => {
+        const word = wordsMap.get(item.wordId);
+        return {
+          userId: item.userId,
+          wordId: item.wordId,
+          word: word ? {
+            id: word.id,
+            textEn: word.text,
+            level: word.level,
+            exampleEn: word.exampleEn,
+            exampleRu: word.exampleRu,
+            tags: word.tags,
+            pronunciations: word.pronunciations.map(p => ({
+              locale: p.locale,
+              ipa: p.ipa,
+              audioUrl: p.audioUrl,
+            })),
+          } : null,
+        };
+      }).filter(item => item.word !== null),
+    };
+  }
+
+  async markSent(userId: string, wordId: string, messageId: string, sentAt: string): Promise<void> {
+    await this.srsRepository.markSent(
+      userId as any, 
+      wordId as any, 
+      messageId, 
+      new Date(sentAt)
+    );
+  }
+
+  async resetToDue(userId: string, wordId: string): Promise<void> {
+    await this.srsRepository.resetToDue(userId as any, wordId as any);
+  }
+
+  async processTimeouts(timeoutMinutes: number = 1440): Promise<{ processedCount: number }> {
+    const processedCount = await this.srsRepository.processTimeouts(timeoutMinutes);
+    return { processedCount };
+  }
+
+  async getProcessingStats() {
+    return this.srsRepository.getProcessingStats();
+  }
 }

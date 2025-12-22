@@ -50,7 +50,7 @@ export class CallbackHandlers {
         return;
       }
 
-      if (profile.userId !== parsed.userId) {
+      if (profile.id !== parsed.userId) {
         await ctx.answerCbQuery('Unauthorized callback');
         return;
       }

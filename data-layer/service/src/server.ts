@@ -13,10 +13,12 @@ import { createRepositories, getRepositoryConfigFromEnv } from './config/reposit
 import { WordService } from './services/WordService.js';
 import { UserProgressService } from './services/UserProgressService.js';
 import { SrsService } from './services/SrsService.js';
+import { UserProfileService } from './services/UserProfileService.js';
 
 import { wordsRoutes } from './routes/words.js';
 import { userProgressRoutes } from './routes/user-progress.js';
 import { srsRoutes } from './routes/srs.js';
+import { userProfileRoutes } from './routes/user-profiles.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 const HOST = process.env.HOST || '127.0.0.1';
@@ -51,6 +53,7 @@ async function createServer() {
   const wordService = new WordService(repositories.wordRepository);
   const userProgressService = new UserProgressService(repositories.userWordStateRepository);
   const srsService = new SrsService(repositories.srsRepository, repositories.wordRepository);
+  const userProfileService = new UserProfileService(repositories.userProfileRepository);
 
   // Health check
   fastify.get('/health', async () => {
@@ -75,6 +78,11 @@ async function createServer() {
   await fastify.register(srsRoutes, { 
     prefix: '/api/srs',
     srsService 
+  });
+
+  await fastify.register(userProfileRoutes, { 
+    prefix: '/api/user-profiles',
+    userProfileService 
   });
 
   // Global error handler

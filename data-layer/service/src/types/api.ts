@@ -34,6 +34,14 @@ export const RecordReviewRequestSchema = z.object({
   difficulty: z.enum(['easy', 'medium', 'hard', 'very_hard']),
 });
 
+export const UpdateProfileRequestSchema = z.object({
+  timezone: z.string().optional(),
+  dailyWordLimit: z.number().int().min(1).max(100).optional(),
+  preferredWindowStart: z.string().regex(/^\d{2}:\d{2}$/).optional(), // HH:MM format
+  preferredWindowEnd: z.string().regex(/^\d{2}:\d{2}$/).optional(),   // HH:MM format
+  paused: z.boolean().optional(),
+});
+
 // API Response types
 export interface WordResponse {
   id: string;
@@ -76,6 +84,29 @@ export interface SrsStatsResponse {
   reviewCount: number;
 }
 
+export interface UserProfileResponse {
+  id: string;
+  telegramChatId?: string;
+  timezone: string;
+  dailyWordLimit: number;
+  preferredWindowStart: string; // HH:MM format
+  preferredWindowEnd: string;   // HH:MM format
+  paused: boolean;
+}
+
+export interface DeliveryWindowResponse {
+  withinWindow: boolean;
+  windowStart: string;
+  windowEnd: string;
+  userTimezone: string;
+}
+
+export interface DailyLimitResponse {
+  hasReachedLimit: boolean;
+  reviewsToday: number;
+  dailyLimit: number;
+}
+
 // API Error response
 export interface ApiErrorResponse {
   error: string;
@@ -89,3 +120,4 @@ export type MarkWordRequest = z.infer<typeof MarkWordRequestSchema>;
 export type GetUserStatsRequest = z.infer<typeof GetUserStatsRequestSchema>;
 export type GetDueWordsRequest = z.infer<typeof GetDueWordsRequestSchema>;
 export type RecordReviewRequest = z.infer<typeof RecordReviewRequestSchema>;
+export type UpdateProfileRequest = z.infer<typeof UpdateProfileRequestSchema>;

@@ -234,6 +234,46 @@ export interface MessageFormatter {
    * @returns Inline keyboard markup
    */
   createDifficultyKeyboard(userId: UserId, wordId: WordId): unknown; // Telegram-specific type
+
+  /**
+   * Format error messages for users
+   * @param message Error message
+   * @returns Formatted error message
+   */
+  formatError(message: string): string;
+
+  /**
+   * Format success messages for users
+   * @param message Success message
+   * @returns Formatted success message
+   */
+  formatSuccess(message: string): string;
+
+  /**
+   * Format linking instructions
+   * @returns Formatted linking instructions
+   */
+  formatLinkInstructions(): string;
+
+  /**
+   * Format pause confirmation message
+   * @returns Formatted pause confirmation
+   */
+  formatPauseConfirmation(): string;
+
+  /**
+   * Format resume confirmation message
+   * @param overdueCount Number of overdue reviews
+   * @returns Formatted resume confirmation
+   */
+  formatResumeConfirmation(overdueCount: number): string;
+
+  /**
+   * Format callback acknowledgment when user rates a word
+   * @param difficulty Difficulty rating
+   * @returns Formatted acknowledgment
+   */
+  formatCallbackAck(difficulty: string): string;
 }
 
 /**

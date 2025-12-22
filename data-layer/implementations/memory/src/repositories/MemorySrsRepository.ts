@@ -118,6 +118,131 @@ export class MemorySrsRepository implements SrsRepository {
     };
   }
 
+  async getGlobalDueReviews(now: Date, limit: number, offset: number): Promise<Array<{
+    userId: UserId;
+    wordId: WordId;
+    nextReviewAt: Date;
+    intervalMinutes: number;
+    reviewCount: number;
+    user: {
+      telegramChatId?: string;
+      timezone: string;
+      preferredWindowStart: string;
+      preferredWindowEnd: string;
+    };
+  }>> {
+    // For memory implementation, return mock data
+    // In real implementation, this would join with user profiles
+    const dueItems = Array.from(this.items.values())
+      .filter(item => item.active && item.nextReviewAt <= now)
+      .sort((a, b) => a.nextReviewAt.getTime() - b.nextReviewAt.getTime())
+      .slice(offset, offset + limit);
+
+    return dueItems.map(item => ({
+      userId: item.userId,
+      wordId: item.wordId,
+      nextReviewAt: item.nextReviewAt,
+      intervalMinutes: item.intervalMinutes,
+      reviewCount: item.reviewCount,
+      user: {
+        telegramChatId: `chat_${item.userId}`,
+        timezone: 'UTC',
+        preferredWindowStart: '09:00',
+        preferredWindowEnd: '21:00',
+      },
+    }));
+  }
+
+  async claimReviews(limit: number): Promise<Array<{
+    userId: UserId;
+    wordId: WordId;
+  }>> {
+    const now = new Date();
+    const dueItems = Array.from(this.items.values())
+      .filter(item => item.active && item.nextReviewAt <= now)
+      .slice(0, limit);
+
+    // In real implementation, this would atomically claim items
+    // For memory, we just return the items
+    return dueItems.map(item => ({
+      userId: item.userId,
+      wordId: item.wordId,
+    }));
+  }
+
+  async markSent(userId: UserId, wordId: WordId, messageId: string, sentAt: Date): Promise<void> {
+    const key = this.getKey(userId, wordId);
+    const item = this.items.get(key);
+    
+    if (item) {
+      // In real implementation, this would update delivery state
+      // For memory, we just track that it was sent
+      (item as any).messageId = messageId;
+      (item as any).sentAt = sentAt;
+    }
+  }
+
+  async resetToDue(userId: UserId, wordId: WordId): Promise<void> {
+    const key = this.getKey(userId, wordId);
+    const item = this.items.get(key);
+    
+    if (item) {
+      // Reset to due state
+      delete (item as any).messageId;
+      delete (item as any).sentAt;
+    }
+  }
+
+  async processTimeouts(timeoutMinutes: number = 1440): Promise<number> {
+    const now = new Date();
+    const timeoutThreshold = new Date(now.getTime() - timeoutMinutes * 60 * 1000);
+    
+    let processedCount = 0;
+    
+    for (const item of this.items.values()) {
+      const sentAt = (item as any).sentAt;
+      if (sentAt && sentAt < timeoutThreshold) {
+        // Process timeout - reset to due
+        delete (item as any).messageId;
+        delete (item as any).sentAt;
+        processedCount++;
+      }
+    }
+    
+    return processedCount;
+  }
+
+  async getProcessingStats(): Promise<{
+    awaitingResponse: number;
+    overdue: number;
+    processedToday: number;
+  }> {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    let awaitingResponse = 0;
+    let overdue = 0;
+    let processedToday = 0;
+    
+    for (const item of this.items.values()) {
+      if ((item as any).messageId) {
+        awaitingResponse++;
+      }
+      if (item.active && item.nextReviewAt < now) {
+        overdue++;
+      }
+      if (item.lastReviewAt && item.lastReviewAt >= todayStart) {
+        processedToday++;
+      }
+    }
+    
+    return {
+      awaitingResponse,
+      overdue,
+      processedToday,
+    };
+  }
+
   // Additional methods for testing
   clear(): void {
     this.items.clear();

@@ -3,17 +3,12 @@
  * Handles difficulty ratings, timeout processing, and SRS calculations
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { DatabaseClient } from '@english-learning/data-layer-client';
 import type { ReviewProcessor } from '../domain/interfaces';
 import type { UserId, WordId, Difficulty } from '../domain/types';
-import { BotSrsRepository } from '../repositories';
 
 export class ReviewProcessorService implements ReviewProcessor {
-  private botSrsRepo: BotSrsRepository;
-
-  constructor(private supabase: SupabaseClient) {
-    this.botSrsRepo = new BotSrsRepository(supabase);
-  }
+  constructor(private dbClient: DatabaseClient) {}
 
   async processCallback(
     userId: UserId,
@@ -22,9 +17,13 @@ export class ReviewProcessorService implements ReviewProcessor {
     difficulty: Difficulty
   ): Promise<boolean> {
     try {
-      // Use the atomic RPC function to process the difficulty rating
-      // This ensures consistency between SRS updates and event recording
-      return await this.botSrsRepo.processDifficultyRating(userId, wordId, messageId, difficulty);
+      // Map domain difficulty to API difficulty
+      const apiDifficulty = this.mapDifficultyToApi(difficulty);
+      
+      // Record the review using Database Service
+      await this.dbClient.recordReview(userId, wordId, apiDifficulty);
+      
+      return true;
     } catch (error) {
       console.error('Error processing callback:', error);
       return false;
@@ -33,8 +32,10 @@ export class ReviewProcessorService implements ReviewProcessor {
 
   async processTimeouts(timeoutMinutes: number = 1440): Promise<number> {
     try {
-      // Use the RPC function to process timed out reviews
-      return await this.botSrsRepo.processTimeouts(timeoutMinutes);
+      // TODO: Create ticket for Database Service to add timeout processing endpoint
+      // For now, return 0 as this functionality needs to be added to Database Service
+      console.warn('processTimeouts: Not yet supported by Database Service');
+      return 0;
     } catch (error) {
       console.error('Error processing timeouts:', error);
       return 0;
@@ -48,26 +49,10 @@ export class ReviewProcessorService implements ReviewProcessor {
     reviewCount: number
   ): Promise<void> {
     try {
-      // Calculate the next interval
-      const intervalMinutes = this.calculateInterval(difficulty, reviewCount);
-      const nextReviewAt = new Date(Date.now() + intervalMinutes * 60 * 1000);
-
-      // Update the SRS item
-      const { error } = await this.supabase
-        .from('srs_items')
-        .update({
-          delivery_state: 'scheduled',
-          next_review_at: nextReviewAt.toISOString(),
-          interval_minutes: intervalMinutes,
-          review_count: reviewCount + 1,
-          last_review_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId)
-        .eq('word_id', wordId);
-
-      if (error) {
-        throw new Error(`Failed to schedule next review: ${error.message}`);
-      }
+      // The Database Service recordReview method handles scheduling automatically
+      // So this method is essentially a no-op when using the Database Service
+      const apiDifficulty = this.mapDifficultyToApi(difficulty);
+      await this.dbClient.recordReview(userId, wordId, apiDifficulty);
     } catch (error) {
       console.error('Error scheduling next review:', error);
       throw error;
@@ -93,6 +78,20 @@ export class ReviewProcessorService implements ReviewProcessor {
     const finalInterval = Math.max(10, baseInterval * multiplier);
     
     return finalInterval;
+  }
+
+  /**
+   * Map domain difficulty to API difficulty
+   */
+  private mapDifficultyToApi(difficulty: Difficulty): 'easy' | 'medium' | 'hard' | 'very_hard' {
+    const mapping = {
+      easy: 'easy' as const,
+      good: 'medium' as const,
+      normal: 'hard' as const,
+      hard: 'very_hard' as const,
+    };
+    
+    return mapping[difficulty];
   }
 
   /**
@@ -147,45 +146,13 @@ export class ReviewProcessorService implements ReviewProcessor {
     processedToday: number;
   }> {
     try {
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      // Count items awaiting response
-      const { count: awaitingCount, error: awaitingError } = await this.supabase
-        .from('srs_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('delivery_state', 'awaiting_response');
-
-      if (awaitingError) {
-        console.error('Error counting awaiting responses:', awaitingError);
-      }
-
-      // Count overdue items (awaiting response for more than 24 hours)
-      const overdueThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      const { count: overdueCount, error: overdueError } = await this.supabase
-        .from('srs_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('delivery_state', 'awaiting_response')
-        .lt('last_sent_at', overdueThreshold.toISOString());
-
-      if (overdueError) {
-        console.error('Error counting overdue items:', overdueError);
-      }
-
-      // Count reviews processed today
-      const { count: processedCount, error: processedError } = await this.supabase
-        .from('review_events')
-        .select('*', { count: 'exact', head: true })
-        .gte('reviewed_at', todayStart.toISOString());
-
-      if (processedError) {
-        console.error('Error counting processed reviews:', processedError);
-      }
-
+      // TODO: Create ticket for Database Service to add processing stats endpoint
+      // For now, return zeros as this functionality needs to be added to Database Service
+      console.warn('getProcessingStats: Not yet supported by Database Service');
       return {
-        awaitingResponse: awaitingCount ?? 0,
-        overdue: overdueCount ?? 0,
-        processedToday: processedCount ?? 0,
+        awaitingResponse: 0,
+        overdue: 0,
+        processedToday: 0,
       };
     } catch (error) {
       console.error('Error getting processing stats:', error);

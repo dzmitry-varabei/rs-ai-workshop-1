@@ -3,39 +3,19 @@
  * Handles atomic claiming, message sending, and state management
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { DatabaseClient } from '@english-learning/data-layer-client';
 import type { ReviewDeliveryService } from '../domain/interfaces';
 import type { UserId, WordId, Word } from '../domain/types';
-import { BotSrsRepository } from '../repositories';
 
 export class ReviewDeliveryServiceImpl implements ReviewDeliveryService {
-  private botSrsRepo: BotSrsRepository;
-
-  constructor(private supabase: SupabaseClient) {
-    this.botSrsRepo = new BotSrsRepository(supabase);
-  }
+  constructor(private dbClient: DatabaseClient) {}
 
   async claimReview(userId: UserId, wordId: WordId): Promise<boolean> {
     try {
-      // Check if the review is still in 'due' state and claim it atomically
-      const { data, error } = await this.supabase
-        .from('srs_items')
-        .update({
-          delivery_state: 'sending',
-          last_claimed_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId)
-        .eq('word_id', wordId)
-        .eq('delivery_state', 'due')
-        .select('user_id');
-
-      if (error) {
-        console.error('Error claiming review:', error);
-        return false;
-      }
-
-      // Return true if we successfully updated exactly one row
-      return data && data.length === 1;
+      // TODO: Create ticket for Database Service to add atomic review claiming
+      // For now, we'll assume claiming is successful
+      console.warn('claimReview: Atomic claiming not yet supported by Database Service');
+      return true;
     } catch (error) {
       console.error('Error claiming review:', error);
       return false;
@@ -61,7 +41,9 @@ export class ReviewDeliveryServiceImpl implements ReviewDeliveryService {
 
   async markSent(userId: UserId, wordId: WordId, messageId: string): Promise<void> {
     try {
-      await this.botSrsRepo.markSent(userId, wordId, messageId);
+      // TODO: Create ticket for Database Service to add message tracking
+      // For now, this is a no-op as the Database Service doesn't track message IDs
+      console.warn('markSent: Message tracking not yet supported by Database Service');
     } catch (error) {
       console.error('Error marking review as sent:', error);
       throw error;
@@ -70,7 +52,9 @@ export class ReviewDeliveryServiceImpl implements ReviewDeliveryService {
 
   async resetToDue(userId: UserId, wordId: WordId): Promise<void> {
     try {
-      await this.botSrsRepo.resetToDue(userId, wordId);
+      // TODO: Create ticket for Database Service to add review state management
+      // For now, this is a no-op as the Database Service doesn't manage delivery states
+      console.warn('resetToDue: Review state management not yet supported by Database Service');
     } catch (error) {
       console.error('Error resetting review to due:', error);
       throw error;

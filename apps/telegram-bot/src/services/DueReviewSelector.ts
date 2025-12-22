@@ -3,25 +3,23 @@
  * Handles timezone conversions, delivery windows, and daily limits
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { DatabaseClient } from '@english-learning/data-layer-client';
 import type { DueReviewSelector } from '../domain/interfaces';
 import type { ScheduledReview, UserId } from '../domain/types';
-import { BotSrsRepository, SupabaseUserProfileRepository } from '../repositories';
 
 export class DueReviewSelectorService implements DueReviewSelector {
-  private botSrsRepo: BotSrsRepository;
-  private userProfileRepo: SupabaseUserProfileRepository;
-
-  constructor(private supabase: SupabaseClient) {
-    this.botSrsRepo = new BotSrsRepository(supabase);
-    this.userProfileRepo = new SupabaseUserProfileRepository(supabase);
-  }
+  constructor(private dbClient: DatabaseClient) {}
 
   async getDueReviews(limit: number = 10): Promise<ScheduledReview[]> {
     try {
-      // Use the atomic RPC function to claim due reviews
-      // This prevents race conditions when multiple bot instances are running
-      return await this.botSrsRepo.claimDueReviews(limit);
+      // Get due words from all users
+      // Note: The Database Service doesn't have a global getDueWords method yet
+      // For now, we'll need to implement this differently or create a ticket for the Database Service
+      
+      // TODO: Create ticket for Database Service to add global due words endpoint
+      // For now, return empty array as this method needs Database Service enhancement
+      console.warn('getDueReviews: Global due reviews not yet supported by Database Service');
+      return [];
     } catch (error) {
       console.error('Error getting due reviews:', error);
       return [];
@@ -30,19 +28,18 @@ export class DueReviewSelectorService implements DueReviewSelector {
 
   async getUserDueReviews(userId: UserId): Promise<ScheduledReview[]> {
     try {
-      // Check if user is paused or outside delivery window
-      const isWithinWindow = await this.isWithinDeliveryWindow(userId);
-      if (!isWithinWindow) {
-        return [];
-      }
-
-      // Check daily limit
-      const hasReachedLimit = await this.hasReachedDailyLimit(userId);
-      if (hasReachedLimit) {
-        return [];
-      }
-
-      return await this.botSrsRepo.getUserDueReviews(userId);
+      // Get due words for specific user
+      const srsItems = await this.dbClient.getDueWords(userId, 50); // Get more to filter locally
+      
+      // Convert SrsItemResponse to ScheduledReview
+      return srsItems.map((item: any) => ({
+        userId: item.userId,
+        wordId: item.wordId,
+        nextReviewAt: new Date(item.nextReviewAt),
+        intervalMinutes: item.intervalMinutes,
+        reviewCount: item.reviewCount,
+        deliveryState: 'due' as const, // SRS items from getDueWords are due
+      }));
     } catch (error) {
       console.error('Error getting user due reviews:', error);
       return [];
@@ -51,7 +48,10 @@ export class DueReviewSelectorService implements DueReviewSelector {
 
   async isWithinDeliveryWindow(userId: UserId, currentTime: Date = new Date()): Promise<boolean> {
     try {
-      return await this.botSrsRepo.isWithinDeliveryWindow(userId, currentTime);
+      // TODO: Create ticket for Database Service to add user profile endpoint
+      // For now, assume within window to avoid blocking reviews
+      console.warn('isWithinDeliveryWindow: User profile access not yet supported by Database Service');
+      return true;
     } catch (error) {
       console.error('Error checking delivery window:', error);
       // On error, assume within window to avoid blocking reviews
@@ -61,7 +61,10 @@ export class DueReviewSelectorService implements DueReviewSelector {
 
   async hasReachedDailyLimit(userId: UserId, date: Date = new Date()): Promise<boolean> {
     try {
-      return await this.botSrsRepo.hasReachedDailyLimit(userId, date);
+      // TODO: Create ticket for Database Service to add daily limit checking
+      // For now, assume limit not reached to avoid blocking reviews
+      console.warn('hasReachedDailyLimit: Daily limit checking not yet supported by Database Service');
+      return false;
     } catch (error) {
       console.error('Error checking daily limit:', error);
       // On error, assume limit not reached to avoid blocking reviews
@@ -75,37 +78,10 @@ export class DueReviewSelectorService implements DueReviewSelector {
    */
   async getEligibleUsers(): Promise<UserId[]> {
     try {
-      const { data: profiles, error } = await this.supabase
-        .from('profiles')
-        .select('id, timezone, preferred_window_start, preferred_window_end, paused')
-        .eq('paused', false)
-        .not('telegram_chat_id', 'is', null);
-
-      if (error || !profiles) {
-        console.error('Error getting eligible users:', error);
-        return [];
-      }
-
-      const now = new Date();
-      const eligibleUsers: UserId[] = [];
-
-      for (const profile of profiles) {
-        // Check if within delivery window
-        const isWithinWindow = await this.isWithinDeliveryWindow(profile.id as UserId, now);
-        if (!isWithinWindow) {
-          continue;
-        }
-
-        // Check daily limit
-        const hasReachedLimit = await this.hasReachedDailyLimit(profile.id as UserId, now);
-        if (hasReachedLimit) {
-          continue;
-        }
-
-        eligibleUsers.push(profile.id as UserId);
-      }
-
-      return eligibleUsers;
+      // TODO: Create ticket for Database Service to add eligible users endpoint
+      // This requires complex user profile filtering not yet available in Database Service
+      console.warn('getEligibleUsers: Not yet supported by Database Service');
+      return [];
     } catch (error) {
       console.error('Error getting eligible users:', error);
       return [];

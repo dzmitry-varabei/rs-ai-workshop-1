@@ -1,4 +1,4 @@
-import type { UserId, WordId, WordStatus, SrsDifficulty } from './types.js';
+import type { UserId, WordId, WordStatus, SrsDifficulty, UserProfile } from './types.js';
 import type { Word } from './word.js';
 import type { ScheduleNextReviewResult } from './srs.js';
 
@@ -190,6 +190,127 @@ export interface SrsRepository {
     active: number;
     due: number;
     reviewCount: number;
+  }>;
+
+  /**
+   * Get global due reviews across all users (for scheduler)
+   * 
+   * @param now - Current time
+   * @param limit - Maximum number of items to return
+   * @param offset - Offset for pagination
+   * @returns Array of SRS items with user and word data
+   */
+  getGlobalDueReviews(now: Date, limit: number, offset: number): Promise<Array<{
+    userId: UserId;
+    wordId: WordId;
+    nextReviewAt: Date;
+    intervalMinutes: number;
+    reviewCount: number;
+    user: {
+      telegramChatId?: string;
+      timezone: string;
+      preferredWindowStart: string;
+      preferredWindowEnd: string;
+    };
+  }>>;
+
+  /**
+   * Claim reviews atomically to prevent race conditions
+   * 
+   * @param limit - Maximum number of reviews to claim
+   * @returns Array of claimed review items
+   */
+  claimReviews(limit: number): Promise<Array<{
+    userId: UserId;
+    wordId: WordId;
+  }>>;
+
+  /**
+   * Mark review as sent with message ID
+   * 
+   * @param userId - User ID
+   * @param wordId - Word ID
+   * @param messageId - Telegram message ID
+   * @param sentAt - Time when message was sent
+   */
+  markSent(userId: UserId, wordId: WordId, messageId: string, sentAt: Date): Promise<void>;
+
+  /**
+   * Reset review to due state if sending failed
+   * 
+   * @param userId - User ID
+   * @param wordId - Word ID
+   */
+  resetToDue(userId: UserId, wordId: WordId): Promise<void>;
+
+  /**
+   * Process reviews that have timed out (no response after specified time)
+   * 
+   * @param timeoutMinutes - Timeout in minutes (default 1440 = 24h)
+   * @returns Number of processed timeouts
+   */
+  processTimeouts(timeoutMinutes: number): Promise<number>;
+
+  /**
+   * Get processing statistics
+   * 
+   * @returns Processing stats
+   */
+  getProcessingStats(): Promise<{
+    awaitingResponse: number;
+    overdue: number;
+    processedToday: number;
+  }>;
+}
+
+/**
+ * Repository interface for user profiles
+ * 
+ * Manages user profile settings for Telegram bot.
+ */
+export interface UserProfileRepository {
+  /**
+   * Get user profile by ID
+   * 
+   * @param userId - User ID
+   * @returns User profile or null if not found
+   */
+  getProfile(userId: UserId): Promise<UserProfile | null>;
+
+  /**
+   * Create or update user profile
+   * 
+   * @param userId - User ID
+   * @param profile - Profile data to update
+   * @returns Updated user profile
+   */
+  upsertProfile(userId: UserId, profile: Partial<Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>>): Promise<UserProfile>;
+
+  /**
+   * Check if current time is within user's delivery window
+   * 
+   * @param userId - User ID
+   * @param currentTime - Current time to check
+   * @returns Whether current time is within delivery window
+   */
+  isWithinDeliveryWindow(userId: UserId, currentTime: Date): Promise<{
+    withinWindow: boolean;
+    windowStart: string;
+    windowEnd: string;
+    userTimezone: string;
+  }>;
+
+  /**
+   * Check if user has reached daily review limit
+   * 
+   * @param userId - User ID
+   * @param date - Date to check (YYYY-MM-DD format)
+   * @returns Whether user has reached daily limit
+   */
+  hasReachedDailyLimit(userId: UserId, date: string): Promise<{
+    hasReachedLimit: boolean;
+    reviewsToday: number;
+    dailyLimit: number;
   }>;
 }
 

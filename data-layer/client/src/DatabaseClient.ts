@@ -49,11 +49,11 @@ export class DatabaseClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const error: ApiErrorResponse = await response.json();
+        const error: ApiErrorResponse = await response.json() as ApiErrorResponse;
         throw new Error(`API Error: ${error.message}`);
       }
 
-      return response.json();
+      return response.json() as Promise<T>;
     } catch (error) {
       clearTimeout(timeoutId);
       
@@ -155,6 +155,64 @@ export class DatabaseClient {
       method: 'POST',
       body: JSON.stringify({ userId, wordId }),
     });
+  }
+
+  // User Profile API
+  async getUserProfile(userId: string): Promise<any> {
+    return this.request(`/api/user-profiles/${userId}`);
+  }
+
+  async updateUserProfile(userId: string, profileData: any): Promise<any> {
+    return this.request(`/api/user-profiles/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+  }
+
+  async checkDeliveryWindow(userId: string, currentTime?: string): Promise<any> {
+    const query = currentTime ? `?currentTime=${encodeURIComponent(currentTime)}` : '';
+    return this.request(`/api/user-profiles/${userId}/delivery-window${query}`);
+  }
+
+  async checkDailyLimit(userId: string, date?: string): Promise<any> {
+    const query = date ? `?date=${date}` : '';
+    return this.request(`/api/user-profiles/${userId}/daily-limit${query}`);
+  }
+
+  // Advanced SRS API
+  async getGlobalDueReviews(limit: number = 10, offset: number = 0): Promise<any> {
+    return this.request(`/api/srs/due-reviews?limit=${limit}&offset=${offset}`);
+  }
+
+  async claimReviews(limit: number = 10): Promise<any> {
+    return this.request('/api/srs/claim-reviews', {
+      method: 'POST',
+      body: JSON.stringify({ limit }),
+    });
+  }
+
+  async markReviewSent(userId: string, wordId: string, messageId: string, sentAt: string): Promise<void> {
+    await this.request(`/api/srs/items/${userId}/${wordId}/mark-sent`, {
+      method: 'PUT',
+      body: JSON.stringify({ messageId, sentAt }),
+    });
+  }
+
+  async resetReviewToDue(userId: string, wordId: string): Promise<void> {
+    await this.request(`/api/srs/items/${userId}/${wordId}/reset-to-due`, {
+      method: 'PUT',
+    });
+  }
+
+  async processTimeouts(timeoutMinutes: number = 1440): Promise<{ processedCount: number }> {
+    return this.request('/api/srs/process-timeouts', {
+      method: 'POST',
+      body: JSON.stringify({ timeoutMinutes }),
+    });
+  }
+
+  async getProcessingStats(): Promise<any> {
+    return this.request('/api/srs/processing-stats');
   }
 
   // Health check

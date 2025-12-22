@@ -38,6 +38,9 @@ Always prefer reading existing docs and code over guessing.
 - `packages/infra-supabase`
   - Implementations of domain repositories using Supabase (Postgres)
   - Used by Database Service (not directly by apps)
+- `packages/infra-memory`
+  - In-memory implementations of domain repositories for testing and development
+  - Used by Database Service when STORAGE_BACKEND=memory
 - `packages/database-service`
   - HTTP API service that provides controlled database access
   - Encapsulates all database operations behind REST endpoints

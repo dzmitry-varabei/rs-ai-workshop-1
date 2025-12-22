@@ -6,7 +6,7 @@
   "scripts": {
     "dev:web": "pnpm --filter web dev",
     "dev:bot": "pnpm --filter telegram-bot dev",
-    "dev:db": "pnpm --filter database-service dev",
+    "dev:db": "pnpm --filter data-layer-service dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",

@@ -1,6 +1,8 @@
 packages:
   - apps/*
   - packages/*
+  - data-layer/*
+  - data-layer/implementations/*
 
 onlyBuiltDependencies:
   - core-js

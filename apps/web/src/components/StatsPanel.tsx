@@ -1,4 +1,4 @@
-import type { UserStatsResponse } from '@english-learning/database-client';
+import type { UserStatsResponse } from '@english-learning/data-layer-client';
 import './StatsPanel.css';
 
 interface StatsPanelProps {

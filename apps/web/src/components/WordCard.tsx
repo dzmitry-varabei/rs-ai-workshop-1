@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import type { WordResponse } from '@english-learning/database-client';
+import type { WordResponse } from '@english-learning/data-layer-client';
 import './WordCard.css';
 
 interface WordCardProps {

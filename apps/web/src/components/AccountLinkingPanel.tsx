@@ -8,6 +8,11 @@ interface AccountLinkingPanelProps {
   onConnectionChange?: (connected: boolean) => void;
 }
 
+interface RetryState {
+  count: number;
+  lastAttempt: Date | null;
+}
+
 export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinkingPanelProps) {
   const [linkCode, setLinkCode] = useState<string | null>(null);
   const [linkCodeExpiry, setLinkCodeExpiry] = useState<Date | null>(null);
@@ -18,29 +23,94 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
   const [error, setError] = useState<string | null>(null);
   const [copyFeedback, setCopyFeedback] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [retryState, setRetryState] = useState<RetryState>({ count: 0, lastAttempt: null });
+  const [isRetrying, setIsRetrying] = useState(false);
 
   const dbClient = createDatabaseClient();
 
-  // Load connection status on mount
-  const loadConnectionStatus = useCallback(async () => {
+  // Enhanced error handling with specific error types
+  const handleApiError = (err: unknown, operation: string): string => {
+    console.error(`Failed to ${operation}:`, err);
+    
+    if (err instanceof Error) {
+      if (err.message.includes('timeout') || err.message.includes('Request timeout')) {
+        return `Request timed out while trying to ${operation}. Please check your internet connection and try again.`;
+      }
+      if (err.message.includes('Network Error') || err.message.includes('fetch')) {
+        return `Network error occurred while trying to ${operation}. Please check your internet connection.`;
+      }
+      if (err.message.includes('404')) {
+        return `Service not found. Please contact support if this issue persists.`;
+      }
+      if (err.message.includes('500')) {
+        return `Server error occurred while trying to ${operation}. Please try again in a few moments.`;
+      }
+      if (err.message.includes('API Error:')) {
+        return err.message.replace('API Error: ', '');
+      }
+      return `Failed to ${operation}: ${err.message}`;
+    }
+    
+    return `An unexpected error occurred while trying to ${operation}. Please try again.`;
+  };
+
+  // Retry mechanism with exponential backoff
+  const shouldAllowRetry = (): boolean => {
+    if (retryState.count >= 3) return false;
+    if (!retryState.lastAttempt) return true;
+    
+    const timeSinceLastAttempt = Date.now() - retryState.lastAttempt.getTime();
+    const minWaitTime = Math.pow(2, retryState.count) * 1000; // Exponential backoff: 1s, 2s, 4s
+    
+    return timeSinceLastAttempt >= minWaitTime;
+  };
+
+  const updateRetryState = () => {
+    setRetryState(prev => ({
+      count: prev.count + 1,
+      lastAttempt: new Date(),
+    }));
+  };
+
+  const resetRetryState = () => {
+    setRetryState({ count: 0, lastAttempt: null });
+  };
+
+  // Load connection status on mount with retry logic
+  const loadConnectionStatus = useCallback(async (isRetry = false) => {
+    if (isRetry && !shouldAllowRetry()) {
+      setError('Too many retry attempts. Please wait a moment before trying again.');
+      return;
+    }
+
     try {
       setError(null);
+      if (isRetry) {
+        setIsRetrying(true);
+        updateRetryState();
+      }
+      
       const status = await dbClient.getTelegramConnection(userId);
       setConnectionStatus(status);
       onConnectionChange?.(status.isConnected);
+      
+      if (isRetry) {
+        resetRetryState(); // Reset on successful retry
+      }
     } catch (err) {
-      console.error('Failed to load connection status:', err);
-      setError('Failed to load connection status. Please try again.');
+      const errorMessage = handleApiError(err, 'load connection status');
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
+      setIsRetrying(false);
     }
-  }, [userId, dbClient, onConnectionChange]);
+  }, [userId, dbClient, onConnectionChange, retryState.count, retryState.lastAttempt]);
 
   useEffect(() => {
     loadConnectionStatus();
   }, [loadConnectionStatus]);
 
-  // Generate new link code
+  // Generate new link code with enhanced error handling
   const generateLinkCode = async () => {
     setIsGenerating(true);
     setError(null);
@@ -48,15 +118,16 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
       const response: LinkCodeResponse = await dbClient.generateLinkCode(userId);
       setLinkCode(response.code);
       setLinkCodeExpiry(new Date(response.expiresAt));
+      resetRetryState(); // Reset retry state on success
     } catch (err) {
-      console.error('Failed to generate link code:', err);
-      setError('Failed to generate link code. Please try again.');
+      const errorMessage = handleApiError(err, 'generate link code');
+      setError(errorMessage);
     } finally {
       setIsGenerating(false);
     }
   };
 
-  // Copy link code to clipboard
+  // Enhanced clipboard functionality with better error handling
   const copyToClipboard = async () => {
     if (!linkCode) return;
 
@@ -74,22 +145,28 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        document.execCommand('copy');
+        
+        const successful = document.execCommand('copy');
         textArea.remove();
+        
+        if (!successful) {
+          throw new Error('Copy command failed');
+        }
       }
 
-      // Show feedback
+      // Show success feedback
       setCopyFeedback(true);
       setTimeout(() => setCopyFeedback(false), 2000);
+      setError(null); // Clear any previous errors
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
-      setError('Failed to copy code. Please copy it manually.');
+      setError(`Failed to copy code to clipboard. Please copy it manually: ${linkCode}`);
     }
   };
 
-  // Disconnect Telegram account
+  // Disconnect with enhanced error handling
   const disconnectTelegram = async () => {
-    if (!window.confirm('Are you sure you want to disconnect your Telegram account?')) {
+    if (!window.confirm('Are you sure you want to disconnect your Telegram account? You will no longer receive spaced repetition reviews.')) {
       return;
     }
 
@@ -99,9 +176,10 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
       await loadConnectionStatus(); // Refresh status
       setLinkCode(null); // Clear any existing link code
       setLinkCodeExpiry(null);
+      resetRetryState(); // Reset retry state on success
     } catch (err) {
-      console.error('Failed to disconnect Telegram:', err);
-      setError('Failed to disconnect Telegram account. Please try again.');
+      const errorMessage = handleApiError(err, 'disconnect Telegram account');
+      setError(errorMessage);
     }
   };
 
@@ -111,17 +189,31 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
     return new Date() > linkCodeExpiry;
   };
 
-  // Format expiry time
+  // Format expiry time with better handling
   const formatExpiryTime = () => {
     if (!linkCodeExpiry) return '';
     const now = new Date();
     const diff = linkCodeExpiry.getTime() - now.getTime();
+    
+    if (diff <= 0) return 'Expired';
+    
     const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
     
-    if (diff <= 0) return 'Expired';
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
+
+  // Auto-refresh expiry countdown
+  useEffect(() => {
+    if (!linkCodeExpiry || isLinkCodeExpired()) return;
+
+    const interval = setInterval(() => {
+      // Force re-render to update countdown
+      setLinkCodeExpiry(prev => prev);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [linkCodeExpiry]);
 
   if (isLoading) {
     return (
@@ -132,28 +224,56 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
   }
 
   return (
-    <div className="account-linking-panel">
-      <h2>Telegram Bot Connection</h2>
+    <div className="account-linking-panel" role="region" aria-labelledby="telegram-connection-heading">
+      <h2 id="telegram-connection-heading">Telegram Bot Connection</h2>
       
       {error && (
-        <div className="error-message">
-          {error}
-          <button 
-            className="retry-button" 
-            onClick={() => {
-              setError(null);
-              loadConnectionStatus();
-            }}
-          >
-            Retry
-          </button>
+        <div className="error-message" role="alert" aria-live="polite">
+          <div className="error-text">{error}</div>
+          <div className="error-actions">
+            {shouldAllowRetry() ? (
+              <button 
+                className="retry-button" 
+                onClick={() => {
+                  setError(null);
+                  loadConnectionStatus(true);
+                }}
+                disabled={isRetrying}
+                aria-describedby="retry-help"
+              >
+                {isRetrying ? 'Retrying...' : 'Retry'}
+              </button>
+            ) : (
+              <button 
+                className="retry-button disabled" 
+                disabled
+                title={`Please wait ${Math.ceil((Math.pow(2, retryState.count) * 1000 - (Date.now() - (retryState.lastAttempt?.getTime() || 0))) / 1000)} seconds before retrying`}
+                aria-describedby="retry-cooldown-help"
+              >
+                Wait to retry
+              </button>
+            )}
+            <button 
+              className="dismiss-button" 
+              onClick={() => setError(null)}
+              aria-label="Dismiss error message"
+            >
+              Dismiss
+            </button>
+          </div>
+          <div id="retry-help" className="sr-only">
+            Click to retry the failed operation
+          </div>
+          <div id="retry-cooldown-help" className="sr-only">
+            Retry is temporarily disabled due to multiple failed attempts
+          </div>
         </div>
       )}
 
       {connectionStatus.isConnected ? (
         <div className="connected-state">
-          <div className="connection-status connected">
-            <span className="status-icon">✓</span>
+          <div className="connection-status connected" role="status" aria-live="polite">
+            <span className="status-icon" aria-hidden="true">✓</span>
             <span>Connected to Telegram</span>
           </div>
           {connectionStatus.linkedAt && (
@@ -167,14 +287,18 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
           <button 
             className="disconnect-button"
             onClick={disconnectTelegram}
+            aria-describedby="disconnect-help"
           >
             Disconnect
           </button>
+          <div id="disconnect-help" className="sr-only">
+            This will stop Telegram bot notifications for spaced repetition reviews
+          </div>
         </div>
       ) : (
         <div className="disconnected-state">
-          <div className="connection-status disconnected">
-            <span className="status-icon">○</span>
+          <div className="connection-status disconnected" role="status" aria-live="polite">
+            <span className="status-icon" aria-hidden="true">○</span>
             <span>Not connected</span>
           </div>
           <p className="connection-description">
@@ -186,6 +310,7 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
               className="generate-button"
               onClick={generateLinkCode}
               disabled={isGenerating}
+              aria-describedby="generate-help"
             >
               {isGenerating ? 'Generating...' : 'Connect Telegram Bot'}
             </button>
@@ -205,15 +330,27 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
                   className={`link-code ${isLinkCodeExpired() ? 'expired' : ''}`}
                   onClick={copyToClipboard}
                   title="Click to copy"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      copyToClipboard();
+                    }
+                  }}
+                  aria-label={`Link code: ${linkCode}. Click to copy to clipboard.`}
+                  aria-describedby="link-code-help"
                 >
                   {linkCode}
                 </div>
                 {copyFeedback && (
-                  <div className="copy-feedback">Copied!</div>
+                  <div className="copy-feedback" role="status" aria-live="polite">
+                    Copied!
+                  </div>
                 )}
               </div>
               
-              <div className="expiry-info">
+              <div className="expiry-info" aria-live="polite">
                 {isLinkCodeExpired() ? (
                   <span className="expired-text">Code expired</span>
                 ) : (
@@ -226,6 +363,7 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
                   className="copy-button"
                   onClick={copyToClipboard}
                   disabled={isLinkCodeExpired()}
+                  aria-describedby="copy-help"
                 >
                   Copy Code
                 </button>
@@ -233,12 +371,26 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
                   className="generate-new-button"
                   onClick={generateLinkCode}
                   disabled={isGenerating}
+                  aria-describedby="generate-new-help"
                 >
                   {isGenerating ? 'Generating...' : 'Generate New Code'}
                 </button>
               </div>
+              
+              <div id="link-code-help" className="sr-only">
+                This is your unique linking code. It expires in 15 minutes.
+              </div>
+              <div id="copy-help" className="sr-only">
+                Copy the link code to your clipboard
+              </div>
+              <div id="generate-new-help" className="sr-only">
+                Generate a new link code if the current one has expired
+              </div>
             </div>
           )}
+          <div id="generate-help" className="sr-only">
+            Generate a link code to connect your account with the Telegram bot
+          </div>
         </div>
       )}
     </div>

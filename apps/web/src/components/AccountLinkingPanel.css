@@ -1,10 +1,11 @@
 .account-linking-panel {
-  background: white;
+  width: 100%;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
-  padding: 24px;
-  margin: 20px 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .account-linking-panel h2 {
@@ -27,8 +28,16 @@
   padding: 12px;
   margin-bottom: 16px;
   color: #dc2626;
+}
+
+.error-text {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.error-actions {
   display: flex;
-  justify-content: space-between;
+  gap: 8px;
   align-items: center;
 }
 
@@ -37,14 +46,41 @@
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 4px 12px;
   font-size: 0.875rem;
   cursor: pointer;
   transition: background-color 0.2s;
+  min-width: 60px;
 }
 
-.retry-button:hover {
+.retry-button:hover:not(:disabled) {
   background: #b91c1c;
+}
+
+.retry-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.retry-button.disabled {
+  background: #d1d5db;
+  color: #6b7280;
+}
+
+.dismiss-button {
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dismiss-button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
 }
 
 .connection-status {
@@ -81,32 +117,71 @@
 
 .generate-button,
 .disconnect-button {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
   border-radius: 8px;
   padding: 12px 24px;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.generate-button:hover {
-  background: #2563eb;
+.generate-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .generate-button:disabled {
   background: #9ca3af;
   cursor: not-allowed;
+  position: relative;
+  transform: none;
+  box-shadow: none;
+}
+
+.generate-button:disabled::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.generate-new-button:disabled::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 .disconnect-button {
-  background: #dc2626;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
 }
 
 .disconnect-button:hover {
-  background: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
 .link-code-section {
@@ -141,8 +216,8 @@
 }
 
 .link-code {
-  background: #f3f4f6;
-  border: 2px solid #d1d5db;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(102, 126, 234, 0.3);
   border-radius: 8px;
   padding: 16px;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
@@ -153,11 +228,14 @@
   cursor: pointer;
   transition: all 0.2s;
   user-select: all;
+  color: #1f2937;
 }
 
 .link-code:hover {
-  background: #e5e7eb;
-  border-color: #9ca3af;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(102, 126, 234, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .link-code.expired {
@@ -179,6 +257,15 @@
   font-size: 0.875rem;
   font-weight: 500;
   animation: fadeInOut 2s ease-in-out;
+  z-index: 10;
+}
+
+.copy-feedback.success {
+  background: #059669;
+}
+
+.copy-feedback.error {
+  background: #dc2626;
 }
 
 @keyframes fadeInOut {
@@ -207,44 +294,51 @@
 
 .copy-button,
 .generate-new-button {
-  background: #6b7280;
-  color: white;
-  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #4b5563;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 6px;
   padding: 8px 16px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
-.copy-button:hover {
-  background: #4b5563;
+.copy-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
 }
 
 .copy-button:disabled {
-  background: #9ca3af;
+  background: #f3f4f6;
+  color: #9ca3af;
   cursor: not-allowed;
 }
 
 .generate-new-button {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
 }
 
-.generate-new-button:hover {
-  background: #2563eb;
+.generate-new-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .generate-new-button:disabled {
   background: #9ca3af;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Responsive design */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .account-linking-panel {
-    margin: 16px 0;
-    padding: 20px;
+    margin: 1rem 0;
+    padding: 1rem;
   }
   
   .link-code {
@@ -260,4 +354,39 @@
   .generate-new-button {
     width: 100%;
   }
+  
+  .error-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .retry-button,
+  .dismiss-button {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+}
+
+/* Accessibility - Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus styles for better accessibility */
+.link-code:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }

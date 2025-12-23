@@ -209,13 +209,16 @@ function AppContent() {
         currentProgress={currentIndex + 1}
         totalInBatch={words.length}
       />
-      <AccountLinkingPanel
-        userId={userId}
-        onConnectionChange={(connected) => {
-          // Could be used for future features like showing different UI based on connection status
-          console.log('Telegram connection status:', connected);
-        }}
-      />
+      {/* Show AccountLinkingPanel after user has seen some words */}
+      {stats.totalSeen > 0 && (
+        <AccountLinkingPanel
+          userId={userId}
+          onConnectionChange={(connected) => {
+            // Could be used for future features like showing different UI based on connection status
+            console.log('Telegram connection status:', connected);
+          }}
+        />
+      )}
       <div className="quiz-area">
         {currentWord && (
           <WordCard

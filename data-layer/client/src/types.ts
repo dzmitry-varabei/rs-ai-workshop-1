@@ -46,6 +46,17 @@ export interface SrsStatsResponse {
   reviewCount: number;
 }
 
+export interface LinkCodeResponse {
+  code: string;
+  expiresAt: string; // ISO date string
+}
+
+export interface TelegramConnectionResponse {
+  isConnected: boolean;
+  linkedAt?: string; // ISO date string
+  telegramChatId?: string;
+}
+
 export interface ApiErrorResponse {
   error: string;
   message: string;

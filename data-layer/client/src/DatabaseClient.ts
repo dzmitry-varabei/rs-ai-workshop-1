@@ -10,6 +10,8 @@ import type {
   UserStatsResponse,
   SrsItemResponse,
   SrsStatsResponse,
+  LinkCodeResponse,
+  TelegramConnectionResponse,
   ApiErrorResponse,
 } from './types.js';
 
@@ -213,6 +215,26 @@ export class DatabaseClient {
 
   async getProcessingStats(): Promise<any> {
     return this.request('/api/srs/processing-stats');
+  }
+
+  // Link Code API
+  async generateLinkCode(userId: string): Promise<LinkCodeResponse> {
+    return this.request<LinkCodeResponse>('/api/link-codes/generate', {
+      method: 'POST',
+      body: JSON.stringify({ userId }),
+    });
+  }
+
+  async getTelegramConnection(userId: string): Promise<TelegramConnectionResponse> {
+    return this.request<TelegramConnectionResponse>(
+      `/api/link-codes/connection/${userId}`
+    );
+  }
+
+  async disconnectTelegram(userId: string): Promise<void> {
+    await this.request(`/api/link-codes/connection/${userId}`, {
+      method: 'DELETE',
+    });
   }
 
   // Health check

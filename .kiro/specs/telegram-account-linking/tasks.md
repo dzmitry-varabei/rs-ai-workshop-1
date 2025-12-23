@@ -11,7 +11,7 @@
   - **Property 1: Link code generation and display**
   - **Validates: Requirements 1.2, 1.3, 1.5**
 
-- [ ] 2. Extend DatabaseClient with link code methods
+- [x] 2. Extend DatabaseClient with link code methods
   - Add generateLinkCode method to DatabaseClient
   - Add getTelegramConnection method to DatabaseClient  
   - Add disconnectTelegram method to DatabaseClient

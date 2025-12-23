@@ -131,6 +131,46 @@ Record a review result.
 }
 ```
 
+### Link Codes
+
+#### POST /api/link-codes/generate
+Generate a new link code for account linking.
+
+**Request:**
+```json
+{
+  "userId": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "code": "string",
+  "expiresAt": "ISO8601 date string"
+}
+```
+
+#### GET /api/link-codes/connection/:userId
+Get Telegram connection status for a user.
+
+**Response:**
+```json
+{
+  "isConnected": "boolean",
+  "linkedAt": "ISO8601 date string",
+  "telegramChatId": "string"
+}
+```
+
+#### DELETE /api/link-codes/connection/:userId
+Disconnect Telegram account for a user.
+
+**Response:**
+```
+204 No Content
+```
+
 ## Error Responses
 
 All endpoints may return error responses in the following format:

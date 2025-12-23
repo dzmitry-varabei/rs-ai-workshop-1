@@ -9,4 +9,5 @@ export { createSupabaseClient } from './client.js';
 export { SupabaseWordRepository } from './repositories/word.repository.js';
 export { SupabaseUserWordStateRepository } from './repositories/user-word-state.repository.js';
 export { SupabaseSrsRepository } from './repositories/srs.repository.js';
+export { SupabaseLinkCodeRepository } from './repositories/link-code.repository.js';
 

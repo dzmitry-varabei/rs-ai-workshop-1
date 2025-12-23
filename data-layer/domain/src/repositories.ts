@@ -1,4 +1,4 @@
-import type { UserId, WordId, WordStatus, SrsDifficulty, UserProfile } from './types.js';
+import type { UserId, WordId, WordStatus, SrsDifficulty, UserProfile, LinkCode } from './types.js';
 import type { Word } from './word.js';
 import type { ScheduleNextReviewResult } from './srs.js';
 
@@ -312,5 +312,44 @@ export interface UserProfileRepository {
     reviewsToday: number;
     dailyLimit: number;
   }>;
+}
+
+/**
+ * Repository interface for link codes
+ * 
+ * Manages link codes for account linking between web app and Telegram bot.
+ */
+export interface LinkCodeRepository {
+  /**
+   * Generate a new link code for a user
+   * 
+   * @param userId - User ID
+   * @returns Generated link code
+   */
+  generateLinkCode(userId: UserId): Promise<LinkCode>;
+
+  /**
+   * Get link code by code string
+   * 
+   * @param code - Link code string
+   * @returns Link code or null if not found
+   */
+  getLinkCode(code: string): Promise<LinkCode | null>;
+
+  /**
+   * Mark link code as used
+   * 
+   * @param code - Link code string
+   * @param usedAt - When it was used (defaults to now)
+   */
+  markUsed(code: string, usedAt?: Date): Promise<void>;
+
+  /**
+   * Clean up expired link codes
+   * 
+   * @param before - Clean up codes that expired before this date
+   * @returns Number of codes cleaned up
+   */
+  cleanupExpired(before?: Date): Promise<number>;
 }
 

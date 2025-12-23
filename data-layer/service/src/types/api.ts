@@ -42,6 +42,18 @@ export const UpdateProfileRequestSchema = z.object({
   paused: z.boolean().optional(),
 });
 
+export const GenerateLinkCodeRequestSchema = z.object({
+  userId: z.string().uuid(),
+});
+
+export const GetTelegramConnectionRequestSchema = z.object({
+  userId: z.string().uuid(),
+});
+
+export const DisconnectTelegramRequestSchema = z.object({
+  userId: z.string().uuid(),
+});
+
 // API Response types
 export interface WordResponse {
   id: string;
@@ -107,6 +119,17 @@ export interface DailyLimitResponse {
   dailyLimit: number;
 }
 
+export interface LinkCodeResponse {
+  code: string;
+  expiresAt: string; // ISO date string
+}
+
+export interface TelegramConnectionResponse {
+  isConnected: boolean;
+  linkedAt?: string; // ISO date string
+  telegramChatId?: string;
+}
+
 // API Error response
 export interface ApiErrorResponse {
   error: string;
@@ -121,3 +144,6 @@ export type GetUserStatsRequest = z.infer<typeof GetUserStatsRequestSchema>;
 export type GetDueWordsRequest = z.infer<typeof GetDueWordsRequestSchema>;
 export type RecordReviewRequest = z.infer<typeof RecordReviewRequestSchema>;
 export type UpdateProfileRequest = z.infer<typeof UpdateProfileRequestSchema>;
+export type GenerateLinkCodeRequest = z.infer<typeof GenerateLinkCodeRequestSchema>;
+export type GetTelegramConnectionRequest = z.infer<typeof GetTelegramConnectionRequestSchema>;
+export type DisconnectTelegramRequest = z.infer<typeof DisconnectTelegramRequestSchema>;

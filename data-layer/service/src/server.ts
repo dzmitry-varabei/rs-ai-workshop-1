@@ -14,11 +14,13 @@ import { WordService } from './services/WordService.js';
 import { UserProgressService } from './services/UserProgressService.js';
 import { SrsService } from './services/SrsService.js';
 import { UserProfileService } from './services/UserProfileService.js';
+import { LinkCodeService } from './services/LinkCodeService.js';
 
 import { wordsRoutes } from './routes/words.js';
 import { userProgressRoutes } from './routes/user-progress.js';
 import { srsRoutes } from './routes/srs.js';
 import { userProfileRoutes } from './routes/user-profiles.js';
+import { linkCodeRoutes } from './routes/link-codes.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 const HOST = process.env.HOST || '127.0.0.1';
@@ -54,6 +56,7 @@ async function createServer() {
   const userProgressService = new UserProgressService(repositories.userWordStateRepository);
   const srsService = new SrsService(repositories.srsRepository, repositories.wordRepository);
   const userProfileService = new UserProfileService(repositories.userProfileRepository);
+  const linkCodeService = new LinkCodeService(repositories.linkCodeRepository, repositories.userProfileRepository);
 
   // Health check
   fastify.get('/health', async () => {
@@ -83,6 +86,11 @@ async function createServer() {
   await fastify.register(userProfileRoutes, { 
     prefix: '/api/user-profiles',
     userProfileService 
+  });
+
+  await fastify.register(linkCodeRoutes, { 
+    prefix: '/api/link-codes',
+    linkCodeService 
   });
 
   // Global error handler

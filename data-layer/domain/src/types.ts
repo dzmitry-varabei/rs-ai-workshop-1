@@ -30,3 +30,14 @@ export interface UserProfile {
   updatedAt: Date;
 }
 
+/**
+ * Link code for account linking between web app and Telegram bot
+ */
+export interface LinkCode {
+  code: string; // 8-character alphanumeric
+  userId: UserId;
+  expiresAt: Date;
+  usedAt?: Date;
+  createdAt: Date;
+}
+

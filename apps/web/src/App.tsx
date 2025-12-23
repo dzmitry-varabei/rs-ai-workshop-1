@@ -4,6 +4,7 @@ import { useAuth } from './hooks/useAuth';
 import { WordCard } from './components/WordCard';
 import { StatsPanel } from './components/StatsPanel';
 import { ResetModal } from './components/ResetModal';
+import { AccountLinkingPanel } from './components/AccountLinkingPanel';
 import { createDatabaseClient } from './lib/database';
 import { exportToPDF } from './lib/pdfExport';
 import type { WordResponse, UserStatsResponse } from '@english-learning/data-layer-client';
@@ -207,6 +208,13 @@ function AppContent() {
         stats={stats}
         currentProgress={currentIndex + 1}
         totalInBatch={words.length}
+      />
+      <AccountLinkingPanel
+        userId={userId}
+        onConnectionChange={(connected) => {
+          // Could be used for future features like showing different UI based on connection status
+          console.log('Telegram connection status:', connected);
+        }}
       />
       <div className="quiz-area">
         {currentWord && (

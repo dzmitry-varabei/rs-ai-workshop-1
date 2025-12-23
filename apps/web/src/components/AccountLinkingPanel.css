@@ -1,0 +1,263 @@
+.account-linking-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.account-linking-panel h2 {
+  margin: 0 0 16px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #6b7280;
+}
+
+.error-message {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  color: #dc2626;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.retry-button {
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+  background: #b91c1c;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.connection-status.connected {
+  color: #059669;
+}
+
+.connection-status.disconnected {
+  color: #6b7280;
+}
+
+.status-icon {
+  font-size: 1.2rem;
+}
+
+.connection-info {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 8px 0;
+}
+
+.connection-description {
+  color: #4b5563;
+  margin: 12px 0 20px 0;
+  line-height: 1.5;
+}
+
+.generate-button,
+.disconnect-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.generate-button:hover {
+  background: #2563eb;
+}
+
+.generate-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.disconnect-button {
+  background: #dc2626;
+}
+
+.disconnect-button:hover {
+  background: #b91c1c;
+}
+
+.link-code-section {
+  margin-top: 20px;
+}
+
+.instructions {
+  margin-bottom: 20px;
+}
+
+.instructions h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.instructions ol {
+  margin: 0;
+  padding-left: 20px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.instructions li {
+  margin-bottom: 4px;
+}
+
+.link-code-display {
+  position: relative;
+  margin: 16px 0;
+}
+
+.link-code {
+  background: #f3f4f6;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: all;
+}
+
+.link-code:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.link-code.expired {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+  cursor: not-allowed;
+}
+
+.copy-feedback {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #059669;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: fadeInOut 2s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  20%, 80% { opacity: 1; }
+}
+
+.expiry-info {
+  text-align: center;
+  margin: 12px 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.expired-text {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.code-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.copy-button,
+.generate-new-button {
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.copy-button:hover {
+  background: #4b5563;
+}
+
+.copy-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.generate-new-button {
+  background: #3b82f6;
+}
+
+.generate-new-button:hover {
+  background: #2563eb;
+}
+
+.generate-new-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .account-linking-panel {
+    margin: 16px 0;
+    padding: 20px;
+  }
+  
+  .link-code {
+    font-size: 1.25rem;
+    padding: 12px;
+  }
+  
+  .code-actions {
+    flex-direction: column;
+  }
+  
+  .copy-button,
+  .generate-new-button {
+    width: 100%;
+  }
+}

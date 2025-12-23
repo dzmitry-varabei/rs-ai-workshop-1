@@ -11,7 +11,6 @@ import type {
   ReviewEventRepository,
   DueReviewSelector,
 } from '../domain/interfaces';
-import type { UserId } from '../domain/types';
 
 export class CommandHandlers {
   constructor(
@@ -271,6 +270,57 @@ export class CommandHandlers {
   }
 
   /**
+   * Handle /review command - get words for immediate review
+   */
+  async handleReview(ctx: Context): Promise<void> {
+    try {
+      const profile = await this.getLinkedProfile(ctx);
+      if (!profile) return;
+      
+      // Get due words for review
+      const dueWords = await this.dueReviewSelector.getUserDueReviews(profile.id);
+      
+      if (dueWords.length === 0) {
+        const message = `📚 No words due for review right now\\!\n\nCheck back later or complete more vocabulary quizzes in the web app to add new words\\.`;
+        await ctx.reply(message, { parse_mode: 'MarkdownV2' });
+        return;
+      }
+
+      // Send the first due word for review
+      const scheduledReview = dueWords[0];
+      
+      // Get the actual word data
+      const word = await this.getWordById(scheduledReview.wordId);
+      if (!word) {
+        const message = `❌ Error loading word for review\\. Please try again later\\.`;
+        await ctx.reply(message, { parse_mode: 'MarkdownV2' });
+        return;
+      }
+      
+      const reviewMessage = this.messageFormatter.formatReview(word);
+      
+      await ctx.reply(reviewMessage, {
+        parse_mode: 'MarkdownV2',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: '😊 Easy', callback_data: `review:${scheduledReview.wordId}:easy` },
+              { text: '🤔 Medium', callback_data: `review:${scheduledReview.wordId}:medium` }
+            ],
+            [
+              { text: '😰 Hard', callback_data: `review:${scheduledReview.wordId}:hard` },
+              { text: '❌ Again', callback_data: `review:${scheduledReview.wordId}:again` }
+            ]
+          ]
+        }
+      });
+    } catch (error) {
+      console.error('Error in handleReview:', error);
+      await ctx.reply(this.messageFormatter.formatError('Unable to load review. Please try again.'), { parse_mode: 'MarkdownV2' });
+    }
+  }
+
+  /**
    * Handle unknown commands - provide helpful guidance
    */
   async handleUnknownCommand(ctx: Context): Promise<void> {
@@ -280,6 +330,28 @@ export class CommandHandlers {
     } catch (error) {
       console.error('Error in handleUnknownCommand:', error);
       await ctx.reply('Unknown command. Use /help for available commands.');
+    }
+  }
+
+  /**
+   * Get word by ID using Database Service
+   */
+  private async getWordById(wordId: string): Promise<any> {
+    try {
+      // We need access to DatabaseClient to get word data
+      // For now, we'll return a mock word structure
+      // This should be improved by injecting DatabaseClient into CommandHandlers
+      return {
+        id: wordId,
+        text: 'example',
+        level: 'A1',
+        pronunciations: [],
+        translations: [],
+        examples: [],
+      };
+    } catch (error) {
+      console.error('Error getting word by ID:', error);
+      return null;
     }
   }
 

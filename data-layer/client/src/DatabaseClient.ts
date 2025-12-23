@@ -237,6 +237,33 @@ export class DatabaseClient {
     });
   }
 
+  // Stats API
+  async getDetailedUserStats(userId: string): Promise<{
+    totalItems: number;
+    dueToday: number;
+    successRate: number;
+    learningStreak: number;
+  }> {
+    return this.request(`/api/stats/${userId}`);
+  }
+
+  async checkUserDailyLimit(userId: string): Promise<{
+    hasReachedLimit: boolean;
+    reviewsToday: number;
+    dailyLimit: number;
+  }> {
+    return this.request(`/api/stats/${userId}/daily-limit`);
+  }
+
+  async checkUserDeliveryWindow(userId: string): Promise<{
+    withinWindow: boolean;
+    windowStart: string;
+    windowEnd: string;
+    userTimezone: string;
+  }> {
+    return this.request(`/api/stats/${userId}/delivery-window`);
+  }
+
   // Health check
   async healthCheck(): Promise<{ status: string; timestamp: string }> {
     return this.request('/health');

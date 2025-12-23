@@ -21,7 +21,7 @@ export class MemoryUserProfileRepository implements UserProfileRepository {
 
     const profile: UserProfile = {
       id: userId,
-      telegramChatId: profileData.telegramChatId || existing?.telegramChatId,
+      telegramChatId: profileData.telegramChatId !== undefined ? profileData.telegramChatId : existing?.telegramChatId,
       timezone: profileData.timezone || existing?.timezone || 'UTC',
       dailyWordLimit: profileData.dailyWordLimit || existing?.dailyWordLimit || 10,
       preferredWindowStart: profileData.preferredWindowStart || existing?.preferredWindowStart || '09:00',

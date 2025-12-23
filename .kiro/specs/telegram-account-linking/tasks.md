@@ -7,7 +7,7 @@
   - Update API documentation with new endpoints
   - _Requirements: 1.2, 2.1, 2.2, 2.5_
 
-- [ ]* 1.1 Write property test for link code generation
+- [x]* 1.1 Write property test for link code generation
   - **Property 1: Link code generation and display**
   - **Validates: Requirements 1.2, 1.3, 1.5**
 
@@ -32,11 +32,11 @@
   - Implement clipboard copy functionality with fallback
   - _Requirements: 1.1, 1.3, 2.2, 2.3, 3.1, 3.2_
 
-- [ ]* 3.1 Write property test for connection state consistency
+- [x]* 3.1 Write property test for connection state consistency
   - **Property 2: Connection state consistency**
   - **Validates: Requirements 2.1, 2.2, 2.3**
 
-- [ ]* 3.2 Write property test for code interaction functionality
+- [x]* 3.2 Write property test for code interaction functionality
   - **Property 3: Code interaction functionality**
   - **Validates: Requirements 3.1, 3.2, 3.3**
 
@@ -47,7 +47,7 @@
   - Create user-friendly error messages with actionable steps
   - _Requirements: 3.3, 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ]* 4.1 Write property test for disconnect operation
+- [x]* 4.1 Write property test for disconnect operation
   - **Property 4: Disconnect operation**
   - **Validates: Requirements 2.5**
 

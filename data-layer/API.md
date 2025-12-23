@@ -171,6 +171,73 @@ Disconnect Telegram account for a user.
 204 No Content
 ```
 
+#### POST /api/link-codes/use
+Use a link code to connect Telegram account.
+
+**Request:**
+```json
+{
+  "code": "string",
+  "telegramChatId": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "success": "boolean",
+  "userId": "string"
+}
+```
+
+**Error Response:**
+```json
+{
+  "error": "string",
+  "message": "string"
+}
+```
+
+### Statistics
+
+#### GET /api/stats/:userId
+Get detailed user learning statistics.
+
+**Response:**
+```json
+{
+  "totalItems": "number",
+  "dueToday": "number", 
+  "successRate": "number",
+  "learningStreak": "number"
+}
+```
+
+#### GET /api/stats/:userId/daily-limit
+Check if user has reached daily review limit.
+
+**Response:**
+```json
+{
+  "hasReachedLimit": "boolean",
+  "reviewsToday": "number",
+  "dailyLimit": "number"
+}
+```
+
+#### GET /api/stats/:userId/delivery-window
+Check if user is within delivery window.
+
+**Response:**
+```json
+{
+  "withinWindow": "boolean",
+  "windowStart": "string",
+  "windowEnd": "string", 
+  "userTimezone": "string"
+}
+```
+
 ## Error Responses
 
 All endpoints may return error responses in the following format:

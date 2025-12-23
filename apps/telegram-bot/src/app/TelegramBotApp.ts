@@ -1,5 +1,4 @@
 import { Telegraf } from 'telegraf';
-import { createClient } from '@supabase/supabase-js';
 import { DatabaseClient } from '@english-learning/data-layer-client';
 import { createLogger } from '../utils/logger';
 import { CommandHandlers } from '../handlers/CommandHandlers';
@@ -8,20 +7,16 @@ import { MessageFormatter } from '../services/MessageFormatter';
 import { DueReviewSelectorService } from '../services/DueReviewSelector';
 import { ReviewDeliveryServiceImpl } from '../services/ReviewDeliveryService';
 import { ReviewProcessorService } from '../services/ReviewProcessor';
-import { AccountLinkerService } from '../services/AccountLinker';
-import {
-  SupabaseLinkCodeRepository,
-  SupabaseLinkAttemptRepository,
-  SupabaseReviewEventRepository,
-  SupabaseUserProfileRepository,
-} from '../repositories';
+import { DatabaseServiceAccountLinker } from '../services/DatabaseServiceAccountLinker';
+import { DatabaseServiceUserProfile } from '../services/DatabaseServiceUserProfile';
+import { DatabaseServiceReviewEventRepository } from '../services/DatabaseServiceReviewEventRepository';
 
 const logger = createLogger('TelegramBotApp');
 
 export class TelegramBotApp {
   private bot: Telegraf;
   private isRunning = false;
-  private schedulerInterval?: NodeJS.Timeout;
+  private schedulerInterval?: ReturnType<typeof setInterval>;
   
   // Services
   private commandHandlers: CommandHandlers;
@@ -54,25 +49,13 @@ export class TelegramBotApp {
     // Initialize services
     const messageFormatter = new MessageFormatter();
     
-    // Note: Account linking still uses Supabase repositories for now
-    // as these are bot-specific tables not yet migrated to Database Service
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    logger.info('Setting up Supabase for account linking...');
-    
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables are required for account linking');
-    }
-    
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    const linkCodeRepo = new SupabaseLinkCodeRepository(supabase);
-    const linkAttemptRepo = new SupabaseLinkAttemptRepository(supabase);
-    const reviewEventRepo = new SupabaseReviewEventRepository(supabase);
-    const userProfileRepo = new SupabaseUserProfileRepository(supabase);
+    // Use Database Service for all repositories
+    const reviewEventRepo = new DatabaseServiceReviewEventRepository(dbClient);
 
     logger.info('Creating core services...');
-    const accountLinker = new AccountLinkerService(linkCodeRepo, linkAttemptRepo, userProfileRepo);
+    // Use Database Service for account linking and user profiles
+    const accountLinker = new DatabaseServiceAccountLinker(databaseServiceUrl);
+    const userProfileRepo = new DatabaseServiceUserProfile(databaseServiceUrl);
     this.dueReviewSelector = new DueReviewSelectorService(dbClient);
     this.reviewDelivery = new ReviewDeliveryServiceImpl(dbClient);
     this.reviewProcessor = new ReviewProcessorService(dbClient);
@@ -199,6 +182,22 @@ export class TelegramBotApp {
       }
     });
 
+    this.bot.command('review', async (ctx) => {
+      const correlationId = this.generateCorrelationId();
+      logger.info(`Review command from user ${ctx.from?.id}`, { correlationId });
+      
+      try {
+        const allowed = await this.commandHandlers.filterCommand('review', ctx);
+        if (!allowed) {
+          await ctx.reply('🔗 Your account is not linked yet.\n\nUse /link to connect your account first.');
+          return;
+        }
+        await this.commandHandlers.handleReview(ctx);
+      } catch (error) {
+        logger.error('Error in review handler:', error, { correlationId });
+      }
+    });
+
     // Handle unknown commands
     this.bot.on('text', async (ctx) => {
       const text = ctx.message.text;
@@ -238,7 +237,7 @@ export class TelegramBotApp {
   }
 
   private generateCorrelationId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
   private async startScheduler(): Promise<void> {

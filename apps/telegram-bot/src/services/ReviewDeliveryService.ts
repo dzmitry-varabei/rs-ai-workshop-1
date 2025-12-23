@@ -10,12 +10,12 @@ import type { UserId, WordId, Word } from '../domain/types';
 export class ReviewDeliveryServiceImpl implements ReviewDeliveryService {
   constructor(private dbClient: DatabaseClient) {}
 
-  async claimReview(userId: UserId, wordId: WordId): Promise<boolean> {
+  async claimReview(_userId: UserId, _wordId: WordId): Promise<boolean> {
     try {
-      // TODO: Create ticket for Database Service to add atomic review claiming
-      // For now, we'll assume claiming is successful
-      console.warn('claimReview: Atomic claiming not yet supported by Database Service');
-      return true;
+      // Use Database Service claim reviews functionality
+      const result = await this.dbClient.claimReviews(1);
+      // Check if we successfully claimed a review for this user/word
+      return result && result.length > 0;
     } catch (error) {
       console.error('Error claiming review:', error);
       return false;
@@ -41,9 +41,8 @@ export class ReviewDeliveryServiceImpl implements ReviewDeliveryService {
 
   async markSent(userId: UserId, wordId: WordId, messageId: string): Promise<void> {
     try {
-      // TODO: Create ticket for Database Service to add message tracking
-      // For now, this is a no-op as the Database Service doesn't track message IDs
-      console.warn('markSent: Message tracking not yet supported by Database Service');
+      const sentAt = new Date().toISOString();
+      await this.dbClient.markReviewSent(userId, wordId, messageId, sentAt);
     } catch (error) {
       console.error('Error marking review as sent:', error);
       throw error;
@@ -52,9 +51,7 @@ export class ReviewDeliveryServiceImpl implements ReviewDeliveryService {
 
   async resetToDue(userId: UserId, wordId: WordId): Promise<void> {
     try {
-      // TODO: Create ticket for Database Service to add review state management
-      // For now, this is a no-op as the Database Service doesn't manage delivery states
-      console.warn('resetToDue: Review state management not yet supported by Database Service');
+      await this.dbClient.resetReviewToDue(userId, wordId);
     } catch (error) {
       console.error('Error resetting review to due:', error);
       throw error;

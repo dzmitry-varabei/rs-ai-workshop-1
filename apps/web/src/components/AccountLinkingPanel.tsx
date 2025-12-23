@@ -55,7 +55,7 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
   };
 
   // Retry mechanism with exponential backoff
-  const shouldAllowRetry = (): boolean => {
+  const shouldAllowRetry = useCallback((): boolean => {
     if (retryState.count >= 3) return false;
     if (!retryState.lastAttempt) return true;
     
@@ -63,7 +63,7 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
     const minWaitTime = Math.pow(2, retryState.count) * 1000; // Exponential backoff: 1s, 2s, 4s
     
     return timeSinceLastAttempt >= minWaitTime;
-  };
+  }, [retryState.count, retryState.lastAttempt]);
 
   const updateRetryState = () => {
     setRetryState(prev => ({
@@ -104,7 +104,7 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
       setIsLoading(false);
       setIsRetrying(false);
     }
-  }, [userId, dbClient, onConnectionChange, retryState.count, retryState.lastAttempt]);
+  }, [userId, dbClient, onConnectionChange, shouldAllowRetry]);
 
   useEffect(() => {
     loadConnectionStatus();
@@ -184,10 +184,10 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
   };
 
   // Check if link code is expired
-  const isLinkCodeExpired = () => {
+  const isLinkCodeExpired = useCallback(() => {
     if (!linkCodeExpiry) return false;
     return new Date() > linkCodeExpiry;
-  };
+  }, [linkCodeExpiry]);
 
   // Format expiry time with better handling
   const formatExpiryTime = () => {
@@ -213,7 +213,7 @@ export function AccountLinkingPanel({ userId, onConnectionChange }: AccountLinki
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [linkCodeExpiry]);
+  }, [linkCodeExpiry, isLinkCodeExpired]);
 
   if (isLoading) {
     return (

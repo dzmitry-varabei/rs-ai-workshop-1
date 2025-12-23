@@ -9,7 +9,7 @@ import type {
   LinkAttemptRepository,
   UserProfileRepository,
 } from '../domain/interfaces';
-import type { LinkCodeValidation, UserId } from '../domain/types';
+import type { LinkCodeValidation } from '../domain/types';
 
 export class AccountLinkerService implements AccountLinker {
   constructor(

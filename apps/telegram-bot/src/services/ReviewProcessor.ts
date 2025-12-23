@@ -32,10 +32,8 @@ export class ReviewProcessorService implements ReviewProcessor {
 
   async processTimeouts(timeoutMinutes: number = 1440): Promise<number> {
     try {
-      // TODO: Create ticket for Database Service to add timeout processing endpoint
-      // For now, return 0 as this functionality needs to be added to Database Service
-      console.warn('processTimeouts: Not yet supported by Database Service');
-      return 0;
+      const result = await this.dbClient.processTimeouts(timeoutMinutes);
+      return result.processedCount;
     } catch (error) {
       console.error('Error processing timeouts:', error);
       return 0;
@@ -46,7 +44,7 @@ export class ReviewProcessorService implements ReviewProcessor {
     userId: UserId,
     wordId: WordId,
     difficulty: Difficulty,
-    reviewCount: number
+    _reviewCount: number
   ): Promise<void> {
     try {
       // The Database Service recordReview method handles scheduling automatically
@@ -146,14 +144,8 @@ export class ReviewProcessorService implements ReviewProcessor {
     processedToday: number;
   }> {
     try {
-      // TODO: Create ticket for Database Service to add processing stats endpoint
-      // For now, return zeros as this functionality needs to be added to Database Service
-      console.warn('getProcessingStats: Not yet supported by Database Service');
-      return {
-        awaitingResponse: 0,
-        overdue: 0,
-        processedToday: 0,
-      };
+      const result = await this.dbClient.getProcessingStats();
+      return result;
     } catch (error) {
       console.error('Error getting processing stats:', error);
       return {

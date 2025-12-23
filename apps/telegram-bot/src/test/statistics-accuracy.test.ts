@@ -13,7 +13,7 @@ import type {
   ReviewEventRepository,
   DueReviewSelector,
 } from '../domain/interfaces';
-import type { UserStats, ReviewEvent, UserId, WordId } from '../domain/types';
+import type { UserStats, UserId } from '../domain/types';
 
 describe('Statistics Accuracy', () => {
   let commandHandlers: CommandHandlers;

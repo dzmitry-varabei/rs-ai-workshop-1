@@ -161,6 +161,12 @@ Always run `pnpm check` before finishing your work.
 
 **Note:** Apps now require the Database Service to be running. Start it with `pnpm dev:db` before starting web or bot apps.
 
+**IMPORTANT - Database Backend Status:**
+- **Supabase support is ON HOLD** - Do not implement Supabase features until UX/UI is fully satisfactory
+- **Use ONLY in-memory database** for all development and testing
+- Database Service automatically uses memory backend by default
+- All new features should work with memory implementation only
+
 ---
 
 ## How to work on issues (step-by-step control)

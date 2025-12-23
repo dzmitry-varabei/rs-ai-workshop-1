@@ -15,12 +15,14 @@ import { UserProgressService } from './services/UserProgressService.js';
 import { SrsService } from './services/SrsService.js';
 import { UserProfileService } from './services/UserProfileService.js';
 import { LinkCodeService } from './services/LinkCodeService.js';
+import { StatsService } from './services/StatsService.js';
 
 import { wordsRoutes } from './routes/words.js';
 import { userProgressRoutes } from './routes/user-progress.js';
 import { srsRoutes } from './routes/srs.js';
 import { userProfileRoutes } from './routes/user-profiles.js';
 import { linkCodeRoutes } from './routes/link-codes.js';
+import { statsRoutes } from './routes/stats.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 const HOST = process.env.HOST || '127.0.0.1';
@@ -57,6 +59,7 @@ async function createServer() {
   const srsService = new SrsService(repositories.srsRepository, repositories.wordRepository);
   const userProfileService = new UserProfileService(repositories.userProfileRepository);
   const linkCodeService = new LinkCodeService(repositories.linkCodeRepository, repositories.userProfileRepository);
+  const statsService = new StatsService(repositories.userProfileRepository, repositories.srsRepository);
 
   // Health check
   fastify.get('/health', async () => {
@@ -91,6 +94,11 @@ async function createServer() {
   await fastify.register(linkCodeRoutes, { 
     prefix: '/api/link-codes',
     linkCodeService 
+  });
+
+  await fastify.register(statsRoutes, { 
+    prefix: '/api/stats',
+    statsService 
   });
 
   // Global error handler

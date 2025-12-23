@@ -10,7 +10,7 @@ import type { ScheduledReview, UserId } from '../domain/types';
 export class DueReviewSelectorService implements DueReviewSelector {
   constructor(private dbClient: DatabaseClient) {}
 
-  async getDueReviews(limit: number = 10): Promise<ScheduledReview[]> {
+  async getDueReviews(_limit: number = 10): Promise<ScheduledReview[]> {
     try {
       // Get due words from all users
       // Note: The Database Service doesn't have a global getDueWords method yet
@@ -46,12 +46,10 @@ export class DueReviewSelectorService implements DueReviewSelector {
     }
   }
 
-  async isWithinDeliveryWindow(userId: UserId, currentTime: Date = new Date()): Promise<boolean> {
+  async isWithinDeliveryWindow(userId: UserId, _currentTime: Date = new Date()): Promise<boolean> {
     try {
-      // TODO: Create ticket for Database Service to add user profile endpoint
-      // For now, assume within window to avoid blocking reviews
-      console.warn('isWithinDeliveryWindow: User profile access not yet supported by Database Service');
-      return true;
+      const result = await this.dbClient.checkDeliveryWindow(userId);
+      return result.withinWindow;
     } catch (error) {
       console.error('Error checking delivery window:', error);
       // On error, assume within window to avoid blocking reviews
@@ -59,12 +57,10 @@ export class DueReviewSelectorService implements DueReviewSelector {
     }
   }
 
-  async hasReachedDailyLimit(userId: UserId, date: Date = new Date()): Promise<boolean> {
+  async hasReachedDailyLimit(userId: UserId, _date: Date = new Date()): Promise<boolean> {
     try {
-      // TODO: Create ticket for Database Service to add daily limit checking
-      // For now, assume limit not reached to avoid blocking reviews
-      console.warn('hasReachedDailyLimit: Daily limit checking not yet supported by Database Service');
-      return false;
+      const result = await this.dbClient.checkDailyLimit(userId);
+      return result.hasReachedLimit;
     } catch (error) {
       console.error('Error checking daily limit:', error);
       // On error, assume limit not reached to avoid blocking reviews

@@ -187,9 +187,9 @@ export class CallbackHandlers {
    * This prevents processing callbacks for reviews that are no longer active
    */
   private async validateCallback(
-    userId: UserId,
-    wordId: WordId,
-    messageId: string
+    _userId: UserId,
+    _wordId: WordId,
+    _messageId: string
   ): Promise<boolean> {
     try {
       // The ReviewProcessor.processCallback method already handles validation

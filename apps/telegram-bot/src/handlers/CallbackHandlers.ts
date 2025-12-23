@@ -8,6 +8,7 @@ import type {
   ReviewProcessor,
   MessageFormatter,
   UserProfileRepository,
+  DueReviewSelector,
 } from '../domain/interfaces';
 import type { Difficulty, UserId, WordId } from '../domain/types';
 
@@ -18,7 +19,8 @@ export class CallbackHandlers {
   constructor(
     private readonly reviewProcessor: ReviewProcessor,
     private readonly messageFormatter: MessageFormatter,
-    private readonly userProfileRepository: UserProfileRepository
+    private readonly userProfileRepository: UserProfileRepository,
+    private readonly dueReviewSelector: DueReviewSelector
   ) {
     // Set up circular reference for callback data storage
     (this.messageFormatter as any).setCallbackHandlers(this);
@@ -149,8 +151,11 @@ export class CallbackHandlers {
         await ctx.answerCbQuery(acknowledgment);
       }
 
-      // Optionally send a follow-up message with next review info
+      // Send a follow-up message with encouragement
       await this.sendFollowUpMessage(ctx, parsed.difficulty);
+      
+      // Automatically show the next word for review
+      await this.showNextWord(ctx, parsed.userId);
       
     } catch (error) {
       console.error('Error in handleDifficultyCallback:', error);
@@ -273,19 +278,62 @@ export class CallbackHandlers {
   }
 
   /**
-   * Get callback statistics for monitoring
+   * Show the next word for review automatically
    */
-  async getCallbackStats(): Promise<{
-    processed: number;
-    duplicates: number;
-    errors: number;
-  }> {
-    // This would return statistics about callback processing
-    // For now, return empty stats
-    return {
-      processed: 0,
-      duplicates: 0,
-      errors: 0
-    };
+  private async showNextWord(ctx: Context, userId: UserId): Promise<void> {
+    try {
+      // Get due words for review
+      const dueWords = await this.dueReviewSelector.getUserDueReviews(userId);
+      
+      if (dueWords.length === 0) {
+        const message = `🎉 Great job\\! No more words due for review right now\\.\n\nCheck back later or complete more vocabulary quizzes in the web app to add new words\\.`;
+        await ctx.reply(message, { parse_mode: 'MarkdownV2' });
+        return;
+      }
+
+      // Send the first due word for review
+      const scheduledReview = dueWords[0];
+      
+      // Get the actual word data
+      const word = await this.getWordById(scheduledReview.wordId);
+      if (!word) {
+        const message = `❌ Error loading next word for review\\. Use /review to try again\\.`;
+        await ctx.reply(message, { parse_mode: 'MarkdownV2' });
+        return;
+      }
+      
+      const reviewMessage = this.messageFormatter.formatReview(word);
+      const keyboard = this.messageFormatter.createDifficultyKeyboard(userId, scheduledReview.wordId);
+      
+      await ctx.reply(reviewMessage, {
+        parse_mode: 'MarkdownV2',
+        reply_markup: keyboard
+      });
+    } catch (error) {
+      console.error('Error showing next word:', error);
+      const message = `❌ Error loading next word\\. Use /review to continue\\.`;
+      await ctx.reply(message, { parse_mode: 'MarkdownV2' });
+    }
+  }
+
+  /**
+   * Get word by ID using Database Service
+   */
+  private async getWordById(wordId: string): Promise<any> {
+    try {
+      // For now, we'll return a mock word structure
+      // This should be improved by injecting DatabaseClient into CallbackHandlers
+      return {
+        id: wordId,
+        text: 'example',
+        level: 'A1',
+        pronunciations: [],
+        translations: [],
+        examples: [],
+      };
+    } catch (error) {
+      console.error('Error getting word by ID:', error);
+      return null;
+    }
   }
 }

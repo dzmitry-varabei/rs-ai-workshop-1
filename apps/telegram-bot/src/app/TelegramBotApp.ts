@@ -73,7 +73,8 @@ export class TelegramBotApp {
     this.callbackHandlers = new CallbackHandlers(
       this.reviewProcessor,
       messageFormatter,
-      userProfileRepo
+      userProfileRepo,
+      this.dueReviewSelector
     );
 
     logger.info('Creating Telegraf bot...');

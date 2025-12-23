@@ -8,6 +8,11 @@ import type { MessageFormatter as IMessageFormatter } from '../domain/interfaces
 import type { UserStats, UserProfile } from '../domain/types';
 
 export class MessageFormatter implements IMessageFormatter {
+  private callbackHandlers?: any; // Will be injected later
+  
+  setCallbackHandlers(handlers: any) {
+    this.callbackHandlers = handlers;
+  }
   
   /**
    * Escape text for MarkdownV2 format
@@ -85,7 +90,7 @@ export class MessageFormatter implements IMessageFormatter {
     
     message += `📚 *Total vocabulary items:* ${totalItems}\n`;
     message += `⏰ *Due for review today:* ${dueToday}\n`;
-    message += `✅ *Success rate \\(last 30 days\\):* ${successRate.toFixed(1)}%\n`;
+    message += `✅ *Success rate \\(last 30 days\\):* ${successRate.toFixed(1).replace('.', '\\.')}%\n`;
     message += `🔥 *Learning streak:* ${learningStreak} days\n`;
     
     // Add motivational message based on stats
@@ -166,18 +171,28 @@ export class MessageFormatter implements IMessageFormatter {
    * Returns the structure expected by Telegraf
    */
   createDifficultyKeyboard(userId: UserId, wordId: WordId): unknown {
+    // Generate a short callback ID and store the mapping
+    const callbackId = this.generateCallbackId();
+    if (this.callbackHandlers) {
+      this.callbackHandlers.storeCallbackData(callbackId, userId, wordId);
+    }
+    
     return {
       inline_keyboard: [
         [
-          { text: '😰 Hard', callback_data: `difficulty:${userId}:${wordId}:hard` },
-          { text: '🤔 Normal', callback_data: `difficulty:${userId}:${wordId}:normal` }
+          { text: '😎 Easy', callback_data: `d:${callbackId}:easy` },
+          { text: '🤔 Medium', callback_data: `d:${callbackId}:good` }
         ],
         [
-          { text: '👍 Good', callback_data: `difficulty:${userId}:${wordId}:good` },
-          { text: '😎 Easy', callback_data: `difficulty:${userId}:${wordId}:easy` }
+          { text: '😰 Hard', callback_data: `d:${callbackId}:normal` },
+          { text: '❌ Again', callback_data: `d:${callbackId}:hard` }
         ]
       ]
     };
+  }
+
+  private generateCallbackId(): string {
+    return Math.random().toString(36).substring(2, 8);
   }
 
   /**
@@ -257,13 +272,13 @@ export class MessageFormatter implements IMessageFormatter {
    * Format callback acknowledgment when user rates a word
    */
   formatCallbackAck(difficulty: string): string {
-    const emoji = {
-      'hard': '😰',
-      'normal': '🤔', 
-      'good': '👍',
-      'easy': '😎'
-    }[difficulty] || '✅';
+    const responses = {
+      'easy': '😎 Easy - Great job!',
+      'good': '🤔 Medium - Keep practicing!', 
+      'normal': '😰 Hard - I\'ll show this again soon!',
+      'hard': '❌ Again - Don\'t worry, we\'ll keep working on this!'
+    }[difficulty] || '✅ Thanks for the feedback!';
     
-    return `${emoji} Rated as: ${difficulty}`;
+    return responses;
   }
 }

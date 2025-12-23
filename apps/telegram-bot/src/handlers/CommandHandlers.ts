@@ -298,21 +298,11 @@ export class CommandHandlers {
       }
       
       const reviewMessage = this.messageFormatter.formatReview(word);
+      const keyboard = this.messageFormatter.createDifficultyKeyboard(profile.id, scheduledReview.wordId);
       
       await ctx.reply(reviewMessage, {
         parse_mode: 'MarkdownV2',
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: '😊 Easy', callback_data: `review:${scheduledReview.wordId}:easy` },
-              { text: '🤔 Medium', callback_data: `review:${scheduledReview.wordId}:medium` }
-            ],
-            [
-              { text: '😰 Hard', callback_data: `review:${scheduledReview.wordId}:hard` },
-              { text: '❌ Again', callback_data: `review:${scheduledReview.wordId}:again` }
-            ]
-          ]
-        }
+        reply_markup: keyboard
       });
     } catch (error) {
       console.error('Error in handleReview:', error);

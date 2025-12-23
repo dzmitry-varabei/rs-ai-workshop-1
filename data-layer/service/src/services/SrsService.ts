@@ -206,4 +206,41 @@ export class SrsService {
   async getProcessingStats() {
     return this.srsRepository.getProcessingStats();
   }
+
+  async forceDue(userId: string): Promise<{ updatedCount: number }> {
+    // For testing: force all user's SRS items to be due now
+    const now = new Date();
+    
+    // Get current stats to see how many items we have
+    const stats = await this.srsRepository.getStats(userId as any);
+    
+    if (stats.active === 0) {
+      return { updatedCount: 0 };
+    }
+    
+    // Since we can't directly access user items through the interface,
+    // we'll use a different approach: get due items with a future date
+    const futureDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
+    
+    // For memory repository, we can access the method directly
+    if (this.srsRepository.constructor.name === 'MemorySrsRepository') {
+      const memoryRepo = this.srsRepository as any;
+      const userItems = memoryRepo.getUserItems(userId as any);
+      
+      let updatedCount = 0;
+      for (const item of userItems) {
+        if (item.active && item.nextReviewAt > now) {
+          // Directly update the item to be due now
+          const key = `${userId}:${item.wordId}`;
+          const updatedItem = { ...item, nextReviewAt: now };
+          memoryRepo.items.set(key, updatedItem);
+          updatedCount++;
+        }
+      }
+      
+      return { updatedCount };
+    }
+    
+    return { updatedCount: 0 };
+  }
 }

@@ -198,4 +198,20 @@ export async function srsRoutes(
   fastify.get('/processing-stats', async () => {
     return srsService.getProcessingStats();
   });
+
+  // POST /api/srs/force-due (for testing)
+  fastify.post('/force-due', {
+    schema: {
+      body: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string', format: 'uuid' },
+        },
+        required: ['userId'],
+      },
+    },
+  }, async (request) => {
+    const { userId } = request.body as { userId: string };
+    return srsService.forceDue(userId);
+  });
 }

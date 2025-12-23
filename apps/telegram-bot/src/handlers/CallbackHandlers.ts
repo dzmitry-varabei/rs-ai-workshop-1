@@ -12,11 +12,36 @@ import type {
 import type { Difficulty, UserId, WordId } from '../domain/types';
 
 export class CallbackHandlers {
+  private callbackDataStore = new Map<string, { userId: UserId; wordId: WordId }>();
+  private callbackCounter = 0;
+
   constructor(
     private readonly reviewProcessor: ReviewProcessor,
     private readonly messageFormatter: MessageFormatter,
     private readonly userProfileRepository: UserProfileRepository
-  ) {}
+  ) {
+    // Set up circular reference for callback data storage
+    (this.messageFormatter as any).setCallbackHandlers(this);
+  }
+
+  /**
+   * Store callback data for short-lived callback IDs
+   */
+  storeCallbackData(callbackId: string, userId: UserId, wordId: WordId): void {
+    this.callbackDataStore.set(callbackId, { userId, wordId });
+    
+    // Clean up after 10 minutes
+    setTimeout(() => {
+      this.callbackDataStore.delete(callbackId);
+    }, 10 * 60 * 1000);
+  }
+
+  /**
+   * Retrieve callback data by callback ID
+   */
+  getCallbackData(callbackId: string): { userId: UserId; wordId: WordId } | null {
+    return this.callbackDataStore.get(callbackId) || null;
+  }
 
   /**
    * Handle callback queries from inline keyboards
@@ -24,6 +49,7 @@ export class CallbackHandlers {
   async handleCallbackQuery(ctx: Context): Promise<void> {
     try {
       if (!ctx.callbackQuery || !('data' in ctx.callbackQuery)) {
+        console.log('Invalid callback query - no data');
         await ctx.answerCbQuery('Invalid callback query');
         return;
       }
@@ -31,26 +57,38 @@ export class CallbackHandlers {
       const callbackData = ctx.callbackQuery.data;
       const chatId = ctx.chat?.id?.toString();
       
+      console.log('Callback data received:', callbackData);
+      console.log('Chat ID:', chatId);
+      
       if (!chatId) {
+        console.log('Unable to identify chat');
         await ctx.answerCbQuery('Unable to identify chat');
         return;
       }
 
       // Parse callback data
       const parsed = this.parseCallbackData(callbackData);
+      console.log('Parsed callback data:', parsed);
+      
       if (!parsed) {
+        console.log('Failed to parse callback data:', callbackData);
         await ctx.answerCbQuery('Invalid callback data');
         return;
       }
 
       // Verify user is linked and matches callback data
       const profile = await this.userProfileRepository.getProfileByChatId(chatId);
+      console.log('User profile found:', !!profile);
+      
       if (!profile) {
+        console.log('Account not linked for chat:', chatId);
         await ctx.answerCbQuery('Account not linked');
         return;
       }
 
+      console.log('Profile ID:', profile.id, 'Parsed userId:', parsed.userId);
       if (profile.id !== parsed.userId) {
+        console.log('Unauthorized callback - profile ID mismatch');
         await ctx.answerCbQuery('Unauthorized callback');
         return;
       }
@@ -58,9 +96,11 @@ export class CallbackHandlers {
       // Handle different callback types
       switch (parsed.type) {
         case 'difficulty':
+          console.log('Processing difficulty callback');
           await this.handleDifficultyCallback(ctx, parsed);
           break;
         default:
+          console.log('Unknown callback type:', parsed.type);
           await ctx.answerCbQuery('Unknown callback type');
       }
     } catch (error) {
@@ -124,10 +164,10 @@ export class CallbackHandlers {
   private async sendFollowUpMessage(ctx: Context, difficulty: Difficulty): Promise<void> {
     try {
       const encouragementMessages = {
-        'hard': 'Don\'t worry\\! I\'ll show this word again soon\\.',
-        'normal': 'Good job\\! Keep practicing\\.',
+        'easy': 'Excellent\\! This word is getting easier for you\\.',
         'good': 'Great\\! You\'re making progress\\.',
-        'easy': 'Excellent\\! This word is getting easier for you\\.'
+        'normal': 'Good job\\! Keep practicing\\.',
+        'hard': 'Don\'t worry\\! I\'ll show this word again soon\\.'
       };
 
       const message = encouragementMessages[difficulty] || 'Thanks for the feedback\\!';
@@ -151,16 +191,16 @@ export class CallbackHandlers {
     difficulty: Difficulty;
   } | null {
     try {
-      // Expected format: "difficulty:userId:wordId:difficulty"
+      // Expected format: "d:callbackId:difficulty"
       const parts = data.split(':');
       
-      if (parts.length !== 4) {
+      if (parts.length !== 3) {
         return null;
       }
 
-      const [type, userId, wordId, difficulty] = parts;
+      const [type, callbackId, difficulty] = parts;
       
-      if (type !== 'difficulty') {
+      if (type !== 'd') {
         return null;
       }
 
@@ -170,10 +210,17 @@ export class CallbackHandlers {
         return null;
       }
 
+      // Retrieve the stored callback data
+      const storedData = this.getCallbackData(callbackId);
+      if (!storedData) {
+        console.log('Callback data not found for ID:', callbackId);
+        return null;
+      }
+
       return {
-        type,
-        userId: userId as UserId,
-        wordId: wordId as WordId,
+        type: 'difficulty',
+        userId: storedData.userId,
+        wordId: storedData.wordId,
         difficulty: difficulty as Difficulty
       };
     } catch (error) {
